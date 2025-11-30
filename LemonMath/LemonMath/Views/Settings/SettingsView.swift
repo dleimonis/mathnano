@@ -22,6 +22,7 @@ struct SettingsView: View {
 
     @StateObject private var usageManager = APIUsageManager.shared
     @AppStorage("geminiAPIKey") private var storedAPIKey = ""
+    @AppStorage("adminAPIKey") private var storedAdminKey = ""
 
     var body: some View {
         NavigationStack {
@@ -200,26 +201,28 @@ struct SettingsView: View {
                 .frame(height: 8)
             }
 
-            // Admin dashboard button (shows if admin key was ever set)
-            Button {
-                showAdminDashboard = true
-            } label: {
-                HStack {
-                    Image(systemName: "gearshape.2.fill")
-                        .foregroundStyle(.purple)
+            // Admin dashboard button (only shows if admin has previously authenticated)
+            if !storedAdminKey.isEmpty {
+                Button {
+                    showAdminDashboard = true
+                } label: {
+                    HStack {
+                        Image(systemName: "gearshape.2.fill")
+                            .foregroundStyle(.purple)
 
-                    Text("Admin Dashboard")
-                        .foregroundStyle(Color.adaptivePrimaryText)
+                        Text("Admin Dashboard")
+                            .foregroundStyle(Color.adaptivePrimaryText)
 
-                    Spacer()
+                        Spacer()
 
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundStyle(Color.adaptiveSecondaryText)
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(Color.adaptiveSecondaryText)
+                    }
+                    .padding()
+                    .background(Color.purple.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
-                .padding()
-                .background(Color.purple.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
             }
         }
         .padding()
@@ -464,6 +467,11 @@ struct SettingsView: View {
             SettingsRow(icon: "number", title: "Version") {
                 Text("1.0.0")
                     .foregroundStyle(Color.adaptiveSecondaryText)
+            }
+            .onLongPressGesture(minimumDuration: 3) {
+                // Secret access to admin dashboard for initial setup
+                // Long press version for 3 seconds to access
+                showAdminDashboard = true
             }
 
             Button {
