@@ -69,18 +69,26 @@ class GeminiService {
             throw GeminiError.quotaExceeded("Request not allowed")
         }
 
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+        // Preprocess image for better handwriting recognition
+        let preprocessor = ImagePreprocessor.shared
+        let preprocessedImage = preprocessor.preprocessForMathNotation(image)
+
+        // Analyze image quality
+        let qualityAnalysis = preprocessedImage.analyzeQuality()
+
+        guard let imageData = preprocessedImage.jpegData(compressionQuality: 0.85) else {
             throw GeminiError.invalidImage
         }
 
         let base64Image = imageData.base64EncodedString()
 
-        // Build the prompt for math problem solving
-        let prompt = buildMathSolvingPrompt(
+        // Build enhanced prompt for math problem solving
+        let prompt = buildEnhancedMathSolvingPrompt(
             language: language,
             includeSteps: options.includeSteps,
             includeAlternatives: options.includeAlternatives,
-            includeRealWorldExamples: options.includeRealWorldExamples
+            includeRealWorldExamples: options.includeRealWorldExamples,
+            imageQuality: qualityAnalysis
         )
 
         let request = GeminiRequest(
@@ -106,7 +114,20 @@ class GeminiService {
             let response: GeminiResponse = try await performRequest(request: request)
 
             // Parse the structured response
-            let mathResponse = try parseMathResponse(from: response, language: language)
+            var mathResponse = try parseMathResponse(from: response, language: language)
+
+            // If confidence is low, try with alternative preprocessing
+            if mathResponse.confidence < 0.7 {
+                if let retryResponse = try? await retryWithAlternativePreprocessing(
+                    originalImage: image,
+                    language: language,
+                    options: options
+                ) {
+                    if retryResponse.confidence > mathResponse.confidence {
+                        mathResponse = retryResponse
+                    }
+                }
+            }
 
             // Record successful request
             await MainActor.run {
@@ -129,6 +150,68 @@ class GeminiService {
             }
             throw error
         }
+    }
+
+    /// Retry recognition with alternative preprocessing for unclear handwriting
+    private func retryWithAlternativePreprocessing(
+        originalImage: UIImage,
+        language: SupportedLanguage,
+        options: SolveOptions
+    ) async throws -> MathSolutionResponse {
+        let preprocessor = ImagePreprocessor.shared
+
+        // Try high contrast variant
+        let highContrastOptions = PreprocessingOptions(
+            normalizeLighting: true,
+            reduceNoise: true,
+            noiseReductionLevel: 0.04,
+            enhanceEdges: true,
+            edgeEnhancementIntensity: 0.8,
+            correctPerspective: false,
+            normalizeLineThickness: true,
+            enhanceContrast: true,
+            contrastAmount: 1.5,
+            applyAdaptiveThreshold: true
+        )
+
+        let enhancedImage = preprocessor.preprocessForHandwriting(originalImage, options: highContrastOptions)
+
+        guard let imageData = enhancedImage.jpegData(compressionQuality: 0.85) else {
+            throw GeminiError.invalidImage
+        }
+
+        let base64Image = imageData.base64EncodedString()
+
+        let prompt = buildEnhancedMathSolvingPrompt(
+            language: language,
+            includeSteps: options.includeSteps,
+            includeAlternatives: options.includeAlternatives,
+            includeRealWorldExamples: options.includeRealWorldExamples,
+            imageQuality: nil,
+            isRetry: true
+        )
+
+        let request = GeminiRequest(
+            contents: [
+                GeminiContent(
+                    parts: [
+                        GeminiPart(text: prompt),
+                        GeminiPart(inlineData: GeminiInlineData(
+                            mimeType: "image/jpeg",
+                            data: base64Image
+                        ))
+                    ]
+                )
+            ],
+            generationConfig: GeminiGenerationConfig(
+                temperature: 0.15,
+                maxOutputTokens: 4096,
+                responseMimeType: "application/json"
+            )
+        )
+
+        let response: GeminiResponse = try await performRequest(request: request)
+        return try parseMathResponse(from: response, language: language)
     }
 
     /// Get detailed explanation for a specific step or concept
@@ -186,13 +269,17 @@ class GeminiService {
         }
     }
 
-    /// Recognize text from a handwritten image
+    /// Recognize text from a handwritten image with enhanced preprocessing
     @MainActor
     func recognizeHandwriting(
         image: UIImage,
         language: SupportedLanguage = .english
     ) async throws -> String {
-        guard let imageData = image.jpegData(compressionQuality: 0.9) else {
+        // Preprocess image for better handwriting recognition
+        let preprocessor = ImagePreprocessor.shared
+        let preprocessedImage = preprocessor.preprocessForMathNotation(image)
+
+        guard let imageData = preprocessedImage.jpegData(compressionQuality: 0.9) else {
             throw GeminiError.invalidImage
         }
 
@@ -200,11 +287,43 @@ class GeminiService {
         let languageName = language == .greek ? "Greek" : "English"
 
         let prompt = """
-        Extract and transcribe all mathematical text, equations, and expressions from this image.
+        You are an expert at reading handwritten mathematical notation. Your task is to accurately transcribe all mathematical text, equations, and expressions from this image.
+
+        HANDWRITING ANALYSIS GUIDELINES:
+        1. Account for natural handwriting variations:
+           - Slanted writing (italic-like appearance)
+           - Inconsistent letter spacing
+           - Variable stroke thickness (thin/thick lines)
+           - Connected or overlapping characters
+
+        2. Mathematical symbol recognition:
+           - Distinguish between similar symbols: 0 vs O, 1 vs l vs I, x vs ×, - vs =
+           - Recognize Greek letters: α, β, γ, θ, π, Σ, etc.
+           - Identify operators: +, -, ×, ÷, =, ≠, <, >, ≤, ≥
+           - Recognize grouping: parentheses (), brackets [], braces {}
+           - Fractions: horizontal lines with numerator above and denominator below
+           - Exponents and subscripts: smaller text positioned above or below
+
+        3. Complex notation:
+           - Integrals: ∫ with limits
+           - Summations: Σ with bounds
+           - Square roots: √ with radicand
+           - Matrices and determinants
+           - Limits: lim with subscript
+
         The text may be in \(languageName).
 
-        Return ONLY the recognized text/equations, preserving mathematical notation.
-        Use standard mathematical symbols (e.g., ^2 for squared, sqrt() for square root).
+        OUTPUT FORMAT:
+        Return ONLY the recognized mathematical text/equations.
+        Use standard ASCII-compatible notation:
+        - x^2 for squared
+        - sqrt(x) for square root
+        - sum(i=1 to n) for summation
+        - int(a to b) for integral
+        - frac(a, b) for fractions
+        - pi, theta, alpha for Greek letters
+
+        If parts are unclear, provide your best interpretation with [?] marking uncertain portions.
         """
 
         let request = GeminiRequest(
@@ -242,27 +361,197 @@ class GeminiService {
         return text
     }
 
+    /// Enhanced handwriting recognition with multiple preprocessing attempts
+    @MainActor
+    func recognizeHandwritingWithRetry(
+        image: UIImage,
+        language: SupportedLanguage = .english,
+        maxRetries: Int = 2
+    ) async throws -> HandwritingRecognitionResult {
+        let preprocessor = ImagePreprocessor.shared
+        let variants = preprocessor.createPreprocessingVariants(image)
+
+        var bestResult: (text: String, confidence: Double)? = nil
+
+        for (index, variant) in variants.prefix(maxRetries + 1).enumerated() {
+            do {
+                let text = try await recognizeHandwritingVariant(
+                    image: variant.image,
+                    language: language,
+                    variantDescription: variant.description
+                )
+
+                // Estimate confidence based on result characteristics
+                let confidence = estimateRecognitionConfidence(text: text)
+
+                if bestResult == nil || confidence > bestResult!.confidence {
+                    bestResult = (text, confidence)
+                }
+
+                // If confidence is high enough, return early
+                if confidence >= 0.85 {
+                    break
+                }
+            } catch {
+                // Continue to next variant on error
+                if index == variants.count - 1 {
+                    throw error
+                }
+            }
+        }
+
+        guard let result = bestResult else {
+            throw GeminiError.invalidResponse
+        }
+
+        return HandwritingRecognitionResult(
+            recognizedText: result.text,
+            confidence: result.confidence,
+            hasUncertainParts: result.text.contains("[?]")
+        )
+    }
+
+    private func recognizeHandwritingVariant(
+        image: UIImage,
+        language: SupportedLanguage,
+        variantDescription: String
+    ) async throws -> String {
+        guard let imageData = image.jpegData(compressionQuality: 0.9) else {
+            throw GeminiError.invalidImage
+        }
+
+        let base64Image = imageData.base64EncodedString()
+        let languageName = language == .greek ? "Greek" : "English"
+
+        let prompt = """
+        Transcribe all mathematical text and equations from this image. Language: \(languageName).
+        Image has been preprocessed with: \(variantDescription).
+
+        Handle handwriting variations: slant, spacing, stroke thickness.
+        Use ASCII notation: x^2, sqrt(x), frac(a,b), sum(), int().
+        Mark unclear parts with [?].
+
+        Return ONLY the transcribed math content.
+        """
+
+        let request = GeminiRequest(
+            contents: [
+                GeminiContent(
+                    parts: [
+                        GeminiPart(text: prompt),
+                        GeminiPart(inlineData: GeminiInlineData(
+                            mimeType: "image/jpeg",
+                            data: base64Image
+                        ))
+                    ]
+                )
+            ],
+            generationConfig: GeminiGenerationConfig(
+                temperature: 0.1,
+                maxOutputTokens: 1024
+            )
+        )
+
+        let response: GeminiResponse = try await performRequest(request: request)
+
+        guard let text = response.candidates?.first?.content.parts.first?.text else {
+            throw GeminiError.invalidResponse
+        }
+
+        return text
+    }
+
+    private func estimateRecognitionConfidence(text: String) -> Double {
+        var confidence = 1.0
+
+        // Reduce confidence for uncertain parts
+        let uncertainCount = text.components(separatedBy: "[?]").count - 1
+        confidence -= Double(uncertainCount) * 0.1
+
+        // Reduce confidence for very short results (might be incomplete)
+        if text.count < 5 {
+            confidence -= 0.2
+        }
+
+        // Reduce confidence for results with many special error indicators
+        if text.contains("unclear") || text.contains("cannot read") {
+            confidence -= 0.3
+        }
+
+        return max(0.1, min(1.0, confidence))
+    }
+
     // MARK: - Private Methods
 
-    private func buildMathSolvingPrompt(
+    /// Enhanced prompt builder with handwriting-specific guidance
+    private func buildEnhancedMathSolvingPrompt(
         language: SupportedLanguage,
         includeSteps: Bool,
         includeAlternatives: Bool,
-        includeRealWorldExamples: Bool
+        includeRealWorldExamples: Bool,
+        imageQuality: ImageQualityAnalysis?,
+        isRetry: Bool = false
     ) -> String {
         let languageName = language == .greek ? "Greek" : "English"
 
-        return """
-        You are a math tutor analyzing a handwritten or printed math problem.
+        var qualityContext = ""
+        if let quality = imageQuality {
+            if quality.brightnessScore < 0.4 {
+                qualityContext += "Note: Image appears dark. Look carefully for faint strokes.\n"
+            }
+            if quality.contrastScore < 0.5 {
+                qualityContext += "Note: Low contrast image. Pay extra attention to light pencil marks.\n"
+            }
+            if quality.sharpnessScore < 0.5 {
+                qualityContext += "Note: Image may be slightly blurry. Use context to interpret unclear characters.\n"
+            }
+        }
 
-        Analyze the image and solve the math problem shown. Respond in \(languageName).
+        let retryContext = isRetry ? """
+
+        IMPORTANT: This is a retry with enhanced image processing. The previous attempt had low confidence.
+        Please be extra careful in interpreting the handwriting and use mathematical context to resolve ambiguities.
+        """ : ""
+
+        return """
+        You are an expert math tutor with exceptional skill at reading handwritten mathematics.
+        Analyze this image and solve the math problem shown. Respond in \(languageName).
+        \(qualityContext)\(retryContext)
+
+        HANDWRITING RECOGNITION GUIDELINES:
+        1. Handle natural handwriting variations:
+           - Slanted/italic writing style
+           - Inconsistent letter and symbol spacing
+           - Variable stroke thickness (thin pencil to thick marker)
+           - Connected or overlapping characters
+           - Rushed or cursive-style writing
+
+        2. Distinguish similar-looking symbols:
+           - Numbers: 0 vs O, 1 vs l vs I vs |, 2 vs Z, 5 vs S, 6 vs b, 8 vs B, 9 vs g
+           - Variables: x vs ×, n vs h, u vs v, a vs α
+           - Operators: - (minus) vs — (bar) vs = (equals)
+           - Greek: θ vs 0, π vs n, Σ vs E, μ vs u
+
+        3. Recognize complex mathematical structures:
+           - Fractions with horizontal bars
+           - Exponents and subscripts (smaller, positioned text)
+           - Square roots and nth roots
+           - Integrals, summations, limits
+           - Matrices and determinants
+           - Piecewise functions
+
+        4. Use mathematical context:
+           - Variable naming conventions (x, y, z for unknowns; a, b, c for constants)
+           - Equation structure (LHS = RHS)
+           - Common patterns (quadratic formula, derivatives, etc.)
 
         Return a JSON object with this exact structure:
         {
-            "recognizedText": "the math problem as text",
-            "problemType": "algebra|geometry|calculus|arithmetic|trigonometry|statistics|unknown",
+            "recognizedText": "the math problem as text (use proper notation: x^2, sqrt(), frac(a,b))",
+            "problemType": "algebra|geometry|calculus|arithmetic|trigonometry|statistics|linear_algebra|differential_equations|unknown",
             "solution": "the final answer",
             "confidence": 0.95,
+            "recognitionNotes": "any notes about unclear parts or interpretation choices",
             "steps": [
                 {
                     "stepNumber": 1,
@@ -295,9 +584,29 @@ class GeminiService {
             """ : "")
         }
 
+        CONFIDENCE SCORING:
+        - 0.9-1.0: Crystal clear, no ambiguity
+        - 0.7-0.9: Minor uncertainties resolved by context
+        - 0.5-0.7: Some ambiguous characters, reasonable interpretation made
+        - Below 0.5: Significant portions unclear, best guess provided
+
         Be thorough but concise. Make explanations clear for students.
-        If you cannot read the problem clearly, set confidence below 0.5 and explain in the solution field.
         """
+    }
+
+    private func buildMathSolvingPrompt(
+        language: SupportedLanguage,
+        includeSteps: Bool,
+        includeAlternatives: Bool,
+        includeRealWorldExamples: Bool
+    ) -> String {
+        return buildEnhancedMathSolvingPrompt(
+            language: language,
+            includeSteps: includeSteps,
+            includeAlternatives: includeAlternatives,
+            includeRealWorldExamples: includeRealWorldExamples,
+            imageQuality: nil
+        )
     }
 
     private func buildExplanationPrompt(
@@ -593,9 +902,27 @@ struct GeminiMathResult: Decodable {
     let problemType: String
     let solution: String
     let confidence: Double
+    let recognitionNotes: String?
     let steps: [GeminiStep]
     let alternativeMethods: [GeminiAlternativeMethod]?
     let realWorldExamples: [GeminiRealWorldExample]?
+}
+
+// MARK: - Handwriting Recognition Result
+struct HandwritingRecognitionResult {
+    let recognizedText: String
+    let confidence: Double
+    let hasUncertainParts: Bool
+
+    var confidenceDescription: String {
+        switch confidence {
+        case 0.9...1.0: return "Very High"
+        case 0.7..<0.9: return "High"
+        case 0.5..<0.7: return "Medium"
+        case 0.3..<0.5: return "Low"
+        default: return "Very Low"
+        }
+    }
 }
 
 struct GeminiStep: Decodable {
