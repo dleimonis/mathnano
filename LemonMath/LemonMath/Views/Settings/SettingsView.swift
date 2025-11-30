@@ -15,7 +15,10 @@ struct SettingsView: View {
     @State private var showClearHistoryConfirmation = false
     @State private var showAchievements = false
     @State private var showTutorial = false
+    @State private var showAdminDashboard = false
     @State private var themeTransitionProgress: CGFloat = 0
+
+    @StateObject private var usageManager = APIUsageManager.shared
 
     var body: some View {
         NavigationStack {
@@ -27,6 +30,9 @@ struct SettingsView: View {
                     LazyVStack(spacing: 24) {
                         // Profile / Stats section
                         profileSection
+
+                        // Usage quota section
+                        usageQuotaSection
 
                         // Appearance section
                         appearanceSection
@@ -52,6 +58,10 @@ struct SettingsView: View {
             .navigationTitle("Settings")
             .sheet(isPresented: $showAchievements) {
                 AchievementsView()
+            }
+            .sheet(isPresented: $showAdminDashboard) {
+                AdminDashboardView()
+                    .environmentObject(settingsManager)
             }
             .fullScreenCover(isPresented: $showTutorial) {
                 InteractiveTutorialView {
@@ -128,6 +138,81 @@ struct SettingsView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
         }
+    }
+
+    // MARK: - Usage Quota Section
+    private var usageQuotaSection: some View {
+        VStack(spacing: 16) {
+            HStack {
+                Text("API Usage")
+                    .font(.headline)
+                    .foregroundStyle(Color.adaptivePrimaryText)
+
+                Spacer()
+
+                // Tier badge
+                Text(usageManager.userQuota.tier.displayName)
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(usageManager.userQuota.tier.color)
+                    .clipShape(Capsule())
+            }
+
+            // Daily usage bar
+            let remaining = usageManager.getRemainingQuota()
+
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text("Today")
+                        .font(.subheadline)
+                        .foregroundStyle(Color.adaptiveSecondaryText)
+                    Spacer()
+                    Text("\(remaining.dailyRemaining) left")
+                        .font(.subheadline)
+                        .foregroundStyle(remaining.dailyRemaining < 5 ? .red : Color.adaptivePrimaryText)
+                }
+
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.gray.opacity(0.2))
+
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(remaining.dailyPercentUsed > 0.9 ? Color.red : LemonMathColors.accent)
+                            .frame(width: geometry.size.width * remaining.dailyPercentUsed)
+                    }
+                }
+                .frame(height: 8)
+            }
+
+            // Admin dashboard button (shows if admin key was ever set)
+            Button {
+                showAdminDashboard = true
+            } label: {
+                HStack {
+                    Image(systemName: "gearshape.2.fill")
+                        .foregroundStyle(.purple)
+
+                    Text("Admin Dashboard")
+                        .foregroundStyle(Color.adaptivePrimaryText)
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(Color.adaptiveSecondaryText)
+                }
+                .padding()
+                .background(Color.purple.opacity(0.1))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+        }
+        .padding()
+        .background(Color.adaptiveCardBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
     // MARK: - Appearance Section

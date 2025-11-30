@@ -19,6 +19,11 @@ class NanoBananaProService {
     private let decoder = JSONDecoder()
     private let encoder = JSONEncoder()
 
+    // Reference to usage manager for quota/rate limit checks
+    private var usageManager: APIUsageManager {
+        APIUsageManager.shared
+    }
+
     init() {
         // Load API key from configuration
         self.apiKey = Bundle.main.object(forInfoDictionaryKey: "NANO_BANANA_PRO_API_KEY") as? String ?? ""
@@ -35,11 +40,21 @@ class NanoBananaProService {
     // MARK: - Public Methods
 
     /// Analyze a math problem image and get solution
+    @MainActor
     func solveMathProblem(
         image: UIImage,
         language: SupportedLanguage = .english,
         options: SolveOptions = .default
     ) async throws -> MathSolutionResponse {
+        // Check quota and rate limits first
+        let permission = usageManager.canMakeRequest()
+        guard permission.isAllowed else {
+            if case .denied(let reason) = permission {
+                throw NanoBananaError.quotaExceeded(reason.message)
+            }
+            throw NanoBananaError.quotaExceeded("Request not allowed")
+        }
+
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             throw NanoBananaError.invalidImage
         }
@@ -56,11 +71,34 @@ class NanoBananaProService {
             graphsEnabled: options.graphsEnabled
         )
 
-        return try await performRequest(
-            endpoint: "/solve",
-            method: .post,
-            body: request
-        )
+        do {
+            let response: MathSolutionResponse = try await performRequest(
+                endpoint: "/solve",
+                method: .post,
+                body: request
+            )
+
+            // Record successful request
+            await MainActor.run {
+                usageManager.recordRequest(
+                    type: .solve,
+                    tokensUsed: RequestType.solve.tokenCost,
+                    success: true
+                )
+            }
+
+            return response
+        } catch {
+            // Record failed request
+            await MainActor.run {
+                usageManager.recordRequest(
+                    type: .solve,
+                    tokensUsed: 0,
+                    success: false
+                )
+            }
+            throw error
+        }
     }
 
     /// Generate a handwritten solution image
@@ -392,6 +430,7 @@ enum NanoBananaError: LocalizedError {
     case serverError
     case networkError
     case apiError(String)
+    case quotaExceeded(String)
     case unknown
 
     var errorDescription: String? {
@@ -404,6 +443,8 @@ enum NanoBananaError: LocalizedError {
             return "Invalid response from server"
         case .unauthorized:
             return "API key is invalid or expired"
+        case .quotaExceeded(let message):
+            return message
         case .rateLimited:
             return "Too many requests. Please try again later"
         case .serverError:
