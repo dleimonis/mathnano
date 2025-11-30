@@ -2,22 +2,101 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Lemon Math - AI Math Problem Solver</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FEEF78">
 </head>
 <body>
-    <div class="app-container">
+    <div class="app-container" id="appContainer">
+        <!-- Onboarding/Tutorial -->
+        <div class="onboarding-overlay" id="onboardingOverlay" style="display: none;">
+            <div class="onboarding-container">
+                <div class="onboarding-slide active" data-slide="0">
+                    <div class="onboarding-mascot">
+                        <div class="mascot-container">
+                            <div class="mascot-body"></div>
+                            <div class="mascot-face">
+                                <div class="mascot-eyes">
+                                    <div class="mascot-eye left"></div>
+                                    <div class="mascot-eye right"></div>
+                                </div>
+                                <div class="mascot-smile"></div>
+                            </div>
+                            <div class="mascot-sparkles">
+                                <span class="sparkle">✨</span>
+                                <span class="sparkle">⭐</span>
+                                <span class="sparkle">✨</span>
+                            </div>
+                        </div>
+                    </div>
+                    <h2>Welcome to Lemon Math!</h2>
+                    <p>Your magical AI-powered math tutor that makes learning fun!</p>
+                </div>
+                <div class="onboarding-slide" data-slide="1">
+                    <div class="onboarding-icon">📸</div>
+                    <h2>Snap or Draw</h2>
+                    <p>Take a photo of any math problem or draw it directly on screen!</p>
+                </div>
+                <div class="onboarding-slide" data-slide="2">
+                    <div class="onboarding-icon">✨</div>
+                    <h2>AI-Powered Solutions</h2>
+                    <p>Get step-by-step explanations with beautiful animations!</p>
+                </div>
+                <div class="onboarding-slide" data-slide="3">
+                    <div class="onboarding-icon">🏆</div>
+                    <h2>Earn Achievements</h2>
+                    <p>Build streaks, unlock badges, and track your progress!</p>
+                </div>
+                <div class="onboarding-dots">
+                    <span class="dot active" data-dot="0"></span>
+                    <span class="dot" data-dot="1"></span>
+                    <span class="dot" data-dot="2"></span>
+                    <span class="dot" data-dot="3"></span>
+                </div>
+                <div class="onboarding-actions">
+                    <button class="skip-btn" onclick="skipOnboarding()">Skip</button>
+                    <button class="next-btn primary-btn" onclick="nextSlide()">Next</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Header -->
         <header class="header">
-            <div class="logo">
-                <span class="logo-icon">🍋</span>
-                <h1>Lemon Math</h1>
+            <div class="header-top">
+                <button class="icon-btn theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+                    <span class="sun-icon">☀️</span>
+                    <span class="moon-icon">🌙</span>
+                </button>
+                <div class="logo">
+                    <div class="mascot-mini" onclick="mascotWave()">
+                        <div class="mascot-mini-body"></div>
+                        <div class="mascot-mini-face"></div>
+                    </div>
+                    <h1>Lemon Math</h1>
+                </div>
+                <button class="icon-btn" onclick="showSettings()" aria-label="Settings">⚙️</button>
             </div>
             <p class="tagline">AI-Powered Math Problem Solver</p>
+            <!-- Stats Bar -->
+            <div class="stats-bar" id="statsBar">
+                <div class="stat-item" onclick="showHistory()">
+                    <span class="stat-value" id="totalSolvedStat">0</span>
+                    <span class="stat-label">Solved</span>
+                </div>
+                <div class="stat-item" onclick="showAchievements()">
+                    <span class="stat-value" id="streakStat">0</span>
+                    <span class="stat-label">Day Streak</span>
+                </div>
+                <div class="stat-item" onclick="showAchievements()">
+                    <span class="stat-value" id="badgesStat">0</span>
+                    <span class="stat-label">Badges</span>
+                </div>
+            </div>
         </header>
 
         <!-- API Key Section -->
@@ -36,153 +115,451 @@
 
         <!-- Main App Section -->
         <div class="main-app" id="mainApp" style="display: none;">
-            <!-- Upload Section -->
-            <div class="upload-section">
-                <div class="card upload-card">
-                    <h2>📸 Scan Your Math Problem</h2>
-                    <p>Take a photo or upload an image of any handwritten or printed math problem</p>
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="solve" onclick="switchTab('solve')">
+                    <span class="nav-icon">📸</span>
+                    <span class="nav-label">Solve</span>
+                </button>
+                <button class="nav-tab" data-tab="draw" onclick="switchTab('draw')">
+                    <span class="nav-icon">✏️</span>
+                    <span class="nav-label">Draw</span>
+                </button>
+                <button class="nav-tab" data-tab="history" onclick="switchTab('history')">
+                    <span class="nav-icon">📚</span>
+                    <span class="nav-label">History</span>
+                </button>
+            </div>
 
-                    <div class="upload-options">
-                        <label class="upload-btn primary-btn">
-                            <span>📷 Take Photo</span>
-                            <input type="file" accept="image/*" capture="environment" onchange="handleImageUpload(event)" hidden>
-                        </label>
-                        <label class="upload-btn secondary-btn">
-                            <span>📁 Upload Image</span>
-                            <input type="file" accept="image/*" onchange="handleImageUpload(event)" hidden>
-                        </label>
+            <!-- Tab Content: Solve -->
+            <div class="tab-content active" id="solveTab">
+                <!-- Upload Section -->
+                <div class="upload-section" id="uploadSection">
+                    <div class="card upload-card">
+                        <h2>📸 Scan Your Math Problem</h2>
+                        <p>Take a photo or upload an image of any handwritten or printed math problem</p>
+
+                        <div class="upload-options">
+                            <label class="upload-btn primary-btn">
+                                <span>📷 Take Photo</span>
+                                <input type="file" accept="image/*" capture="environment" onchange="handleImageUpload(event)" hidden>
+                            </label>
+                            <label class="upload-btn secondary-btn">
+                                <span>📁 Upload Image</span>
+                                <input type="file" accept="image/*" onchange="handleImageUpload(event)" hidden>
+                            </label>
+                        </div>
+
+                        <!-- Image Preview -->
+                        <div class="image-preview" id="imagePreview" style="display: none;">
+                            <img id="previewImg" src="" alt="Preview">
+                            <button onclick="clearImage()" class="clear-btn">✕ Clear</button>
+                        </div>
+
+                        <!-- Solve Button -->
+                        <button onclick="solveProblem()" class="solve-btn" id="solveBtn" disabled>
+                            <span class="solve-icon">✨</span>
+                            <span>Solve Problem</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div class="loading-section" id="loadingSection" style="display: none;">
+                    <div class="card">
+                        <div class="loading-animation">
+                            <div class="loading-mascot">
+                                <div class="mascot-thinking"></div>
+                            </div>
+                            <div class="loading-dots">
+                                <span></span><span></span><span></span>
+                            </div>
+                        </div>
+                        <p class="loading-text">Analyzing your math problem...</p>
+                        <p class="loading-subtext">This usually takes 5-10 seconds</p>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div class="results-section" id="resultsSection" style="display: none;">
+                    <!-- Recognized Problem -->
+                    <div class="card result-card">
+                        <div class="result-header">
+                            <span class="result-icon">📝</span>
+                            <h3>Recognized Problem</h3>
+                            <span class="confidence-badge" id="confidenceBadge">95% confident</span>
+                        </div>
+                        <div class="problem-text" id="recognizedText"></div>
+                        <div class="problem-type" id="problemType"></div>
                     </div>
 
-                    <!-- Image Preview -->
-                    <div class="image-preview" id="imagePreview" style="display: none;">
-                        <img id="previewImg" src="" alt="Preview">
-                        <button onclick="clearImage()" class="clear-btn">✕ Clear</button>
+                    <!-- Solution with Animation -->
+                    <div class="card result-card solution-card">
+                        <div class="result-header">
+                            <span class="result-icon">🎯</span>
+                            <h3>Solution</h3>
+                            <button class="voice-btn" onclick="speakSolution()" aria-label="Read aloud">
+                                🔊
+                            </button>
+                        </div>
+                        <div class="solution-text animated-text" id="solutionText"></div>
                     </div>
 
-                    <!-- Solve Button -->
-                    <button onclick="solveProblem()" class="solve-btn" id="solveBtn" disabled>
+                    <!-- Steps -->
+                    <div class="card result-card">
+                        <div class="result-header">
+                            <span class="result-icon">📚</span>
+                            <h3>Step-by-Step Solution</h3>
+                            <button class="voice-btn" onclick="speakSteps()" aria-label="Read steps aloud">
+                                🔊
+                            </button>
+                        </div>
+                        <div class="steps-container" id="stepsContainer"></div>
+                    </div>
+
+                    <!-- Alternative Methods -->
+                    <div class="card result-card" id="alternativeMethodsCard" style="display: none;">
+                        <div class="result-header">
+                            <span class="result-icon">💡</span>
+                            <h3>Alternative Methods</h3>
+                        </div>
+                        <div class="alternatives-container" id="alternativesContainer"></div>
+                    </div>
+
+                    <!-- Real World Examples -->
+                    <div class="card result-card" id="realWorldCard" style="display: none;">
+                        <div class="result-header">
+                            <span class="result-icon">🌍</span>
+                            <h3>Real-World Applications</h3>
+                        </div>
+                        <div class="examples-container" id="examplesContainer"></div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="result-actions">
+                        <button onclick="newProblem()" class="primary-btn">Solve Another Problem</button>
+                        <button onclick="shareResults()" class="secondary-btn">📤 Share</button>
+                        <button onclick="copyResults()" class="secondary-btn">📋 Copy</button>
+                    </div>
+                </div>
+
+                <!-- Error Section -->
+                <div class="error-section" id="errorSection" style="display: none;">
+                    <div class="card error-card">
+                        <span class="error-icon">⚠️</span>
+                        <h3>Oops! Something went wrong</h3>
+                        <p id="errorMessage"></p>
+                        <button onclick="newProblem()" class="primary-btn">Try Again</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content: Draw -->
+            <div class="tab-content" id="drawTab">
+                <div class="card draw-card">
+                    <h2>✏️ Draw Your Problem</h2>
+                    <p>Use your finger or stylus to write the math problem</p>
+
+                    <div class="canvas-container">
+                        <canvas id="drawCanvas" width="560" height="300"></canvas>
+                        <div class="canvas-tools">
+                            <button class="tool-btn active" data-tool="pen" onclick="setTool('pen')">✏️</button>
+                            <button class="tool-btn" data-tool="eraser" onclick="setTool('eraser')">🧹</button>
+                            <input type="range" id="brushSize" min="2" max="20" value="4" onchange="setBrushSize(this.value)">
+                            <button class="tool-btn" onclick="clearCanvas()">🗑️</button>
+                        </div>
+                    </div>
+
+                    <button onclick="solveDrawing()" class="solve-btn" id="solveDrawingBtn">
                         <span class="solve-icon">✨</span>
                         <span>Solve Problem</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Loading State -->
-            <div class="loading-section" id="loadingSection" style="display: none;">
-                <div class="card">
-                    <div class="loading-spinner"></div>
-                    <p class="loading-text">Analyzing your math problem...</p>
-                    <p class="loading-subtext">This usually takes 5-10 seconds</p>
+            <!-- Tab Content: History -->
+            <div class="tab-content" id="historyTab">
+                <div class="history-header">
+                    <h2>📚 Problem History</h2>
+                    <button class="danger-btn small" onclick="clearHistory()">Clear All</button>
                 </div>
-            </div>
-
-            <!-- Results Section -->
-            <div class="results-section" id="resultsSection" style="display: none;">
-                <!-- Recognized Problem -->
-                <div class="card result-card">
-                    <div class="result-header">
-                        <span class="result-icon">📝</span>
-                        <h3>Recognized Problem</h3>
-                        <span class="confidence-badge" id="confidenceBadge">95% confident</span>
-                    </div>
-                    <div class="problem-text" id="recognizedText"></div>
-                    <div class="problem-type" id="problemType"></div>
-                </div>
-
-                <!-- Solution -->
-                <div class="card result-card solution-card">
-                    <div class="result-header">
-                        <span class="result-icon">🎯</span>
-                        <h3>Solution</h3>
-                    </div>
-                    <div class="solution-text" id="solutionText"></div>
-                </div>
-
-                <!-- Steps -->
-                <div class="card result-card">
-                    <div class="result-header">
-                        <span class="result-icon">📚</span>
-                        <h3>Step-by-Step Solution</h3>
-                    </div>
-                    <div class="steps-container" id="stepsContainer"></div>
-                </div>
-
-                <!-- Alternative Methods -->
-                <div class="card result-card" id="alternativeMethodsCard" style="display: none;">
-                    <div class="result-header">
-                        <span class="result-icon">💡</span>
-                        <h3>Alternative Methods</h3>
-                    </div>
-                    <div class="alternatives-container" id="alternativesContainer"></div>
-                </div>
-
-                <!-- Real World Examples -->
-                <div class="card result-card" id="realWorldCard" style="display: none;">
-                    <div class="result-header">
-                        <span class="result-icon">🌍</span>
-                        <h3>Real-World Applications</h3>
-                    </div>
-                    <div class="examples-container" id="examplesContainer"></div>
-                </div>
-
-                <!-- Actions -->
-                <div class="result-actions">
-                    <button onclick="newProblem()" class="primary-btn">Solve Another Problem</button>
-                    <button onclick="copyResults()" class="secondary-btn">📋 Copy Results</button>
-                </div>
-            </div>
-
-            <!-- Error Section -->
-            <div class="error-section" id="errorSection" style="display: none;">
-                <div class="card error-card">
-                    <span class="error-icon">⚠️</span>
-                    <h3>Oops! Something went wrong</h3>
-                    <p id="errorMessage"></p>
-                    <button onclick="newProblem()" class="primary-btn">Try Again</button>
+                <div class="history-list" id="historyList">
+                    <p class="empty-state">No problems solved yet. Start solving to build your history!</p>
                 </div>
             </div>
         </div>
 
-        <!-- Settings Button -->
-        <button class="settings-btn" onclick="showSettings()" id="settingsBtn" style="display: none;">
-            ⚙️
-        </button>
+        <!-- Usage Quota Display -->
+        <div class="usage-bar" id="usageBar" style="display: none;">
+            <div class="usage-info">
+                <span class="usage-tier" id="usageTier">Free</span>
+                <span class="usage-count" id="usageCount">0/50 today</span>
+            </div>
+            <div class="usage-progress">
+                <div class="usage-fill" id="usageFill" style="width: 0%"></div>
+            </div>
+        </div>
 
         <!-- Settings Modal -->
         <div class="modal" id="settingsModal" style="display: none;">
-            <div class="modal-content">
+            <div class="modal-content settings-modal">
                 <div class="modal-header">
                     <h2>⚙️ Settings</h2>
                     <button onclick="closeSettings()" class="close-btn">✕</button>
                 </div>
                 <div class="modal-body">
-                    <div class="setting-item">
-                        <label>API Key</label>
-                        <div class="input-group">
-                            <input type="password" id="settingsApiKey" placeholder="Your Gemini API key">
-                            <button onclick="updateApiKey()" class="icon-btn">💾</button>
+                    <!-- Appearance -->
+                    <div class="settings-section">
+                        <h3>Appearance</h3>
+                        <div class="setting-item">
+                            <label>Theme</label>
+                            <div class="theme-selector">
+                                <button class="theme-option" data-theme="light" onclick="setTheme('light')">
+                                    ☀️ Light
+                                </button>
+                                <button class="theme-option" data-theme="dark" onclick="setTheme('dark')">
+                                    🌙 Dark
+                                </button>
+                                <button class="theme-option active" data-theme="auto" onclick="setTheme('auto')">
+                                    🔄 Auto
+                                </button>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label>Animation Speed</label>
+                            <select id="animationSpeed" onchange="saveSettings()">
+                                <option value="slow">Slow</option>
+                                <option value="normal" selected>Normal</option>
+                                <option value="fast">Fast</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="setting-item">
-                        <label>Language</label>
-                        <select id="languageSelect">
-                            <option value="english">English</option>
-                            <option value="greek">Greek (Ελληνικά)</option>
-                        </select>
+
+                    <!-- Accessibility -->
+                    <div class="settings-section">
+                        <h3>Accessibility</h3>
+                        <div class="setting-item toggle-item">
+                            <label>Large Text</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="largeText" onchange="toggleLargeText()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item toggle-item">
+                            <label>Voice Guidance</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="voiceGuidance" onchange="saveSettings()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item toggle-item">
+                            <label>Haptic Feedback</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="hapticFeedback" onchange="saveSettings()" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
                     </div>
-                    <div class="setting-item">
-                        <label>
-                            <input type="checkbox" id="includeAlternatives" checked>
-                            Show alternative methods
-                        </label>
+
+                    <!-- Language -->
+                    <div class="settings-section">
+                        <h3>Language</h3>
+                        <div class="setting-item">
+                            <div class="language-options">
+                                <button class="lang-btn active" data-lang="english" onclick="setLanguage('english')">
+                                    🇺🇸 English
+                                </button>
+                                <button class="lang-btn" data-lang="greek" onclick="setLanguage('greek')">
+                                    🇬🇷 Ελληνικά
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="setting-item">
-                        <label>
-                            <input type="checkbox" id="includeExamples" checked>
-                            Show real-world examples
-                        </label>
+
+                    <!-- Content -->
+                    <div class="settings-section">
+                        <h3>Content</h3>
+                        <div class="setting-item toggle-item">
+                            <label>Show Alternative Methods</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="includeAlternatives" checked onchange="saveSettings()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item toggle-item">
+                            <label>Show Real-World Examples</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="includeExamples" checked onchange="saveSettings()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
                     </div>
-                    <button onclick="clearApiKey()" class="danger-btn">🗑️ Clear API Key & Data</button>
+
+                    <!-- Privacy -->
+                    <div class="settings-section">
+                        <h3>Privacy</h3>
+                        <div class="setting-item">
+                            <label>Privacy Level</label>
+                            <select id="privacyLevel" onchange="saveSettings()">
+                                <option value="minimal">Minimal - Basic analytics</option>
+                                <option value="standard" selected>Standard - No personal data</option>
+                                <option value="maximum">Maximum - Full offline mode</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- API Configuration -->
+                    <div class="settings-section">
+                        <h3>API Configuration</h3>
+                        <div class="setting-item">
+                            <label>Gemini API Key</label>
+                            <div class="input-group">
+                                <input type="password" id="settingsApiKey" placeholder="Your Gemini API key">
+                                <button onclick="updateApiKey()" class="icon-btn">💾</button>
+                            </div>
+                        </div>
+                        <div class="api-usage-display" id="apiUsageDisplay">
+                            <div class="usage-stat">
+                                <span class="usage-label">Today's Usage</span>
+                                <span class="usage-value" id="todayUsage">0</span>
+                            </div>
+                            <div class="usage-stat">
+                                <span class="usage-label">Monthly Usage</span>
+                                <span class="usage-value" id="monthlyUsage">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- About -->
+                    <div class="settings-section">
+                        <h3>About</h3>
+                        <div class="setting-item" id="versionRow">
+                            <label>Version</label>
+                            <span class="version-text">1.0.0</span>
+                        </div>
+                        <button onclick="showTutorial()" class="secondary-btn full-width">
+                            🎓 Replay Tutorial
+                        </button>
+                        <a href="privacy-policy.html" target="_blank" class="secondary-btn full-width">
+                            📜 Privacy Policy
+                        </a>
+                    </div>
+
+                    <!-- Data -->
+                    <div class="settings-section">
+                        <h3>Data</h3>
+                        <button onclick="exportData()" class="secondary-btn full-width">
+                            📤 Export Data
+                        </button>
+                        <button onclick="clearAllData()" class="danger-btn full-width">
+                            🗑️ Clear All Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Achievements Modal -->
+        <div class="modal" id="achievementsModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🏆 Achievements</h2>
+                    <button onclick="closeAchievements()" class="close-btn">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="achievements-summary">
+                        <div class="achievement-stat">
+                            <span class="stat-number" id="unlockedBadges">0</span>
+                            <span class="stat-desc">Unlocked</span>
+                        </div>
+                        <div class="achievement-stat">
+                            <span class="stat-number" id="currentStreak">0</span>
+                            <span class="stat-desc">Day Streak</span>
+                        </div>
+                        <div class="achievement-stat">
+                            <span class="stat-number" id="totalProblems">0</span>
+                            <span class="stat-desc">Problems</span>
+                        </div>
+                    </div>
+                    <div class="achievements-list" id="achievementsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard Modal (Hidden Access) -->
+        <div class="modal" id="adminModal" style="display: none;">
+            <div class="modal-content admin-modal">
+                <div class="modal-header">
+                    <h2>🔐 Admin Dashboard</h2>
+                    <button onclick="closeAdmin()" class="close-btn">✕</button>
+                </div>
+                <div class="modal-body" id="adminBody">
+                    <!-- Admin Auth -->
+                    <div class="admin-auth" id="adminAuth">
+                        <p>Enter admin key to access dashboard</p>
+                        <div class="input-group">
+                            <input type="password" id="adminKeyInput" placeholder="Admin Key">
+                            <button onclick="authenticateAdmin()" class="primary-btn">Unlock</button>
+                        </div>
+                    </div>
+                    <!-- Admin Content -->
+                    <div class="admin-content" id="adminContent" style="display: none;">
+                        <div class="admin-section">
+                            <h3>Usage Statistics</h3>
+                            <div class="admin-stats">
+                                <div class="admin-stat">
+                                    <span class="admin-stat-value" id="adminDailyUsage">0</span>
+                                    <span class="admin-stat-label">Today</span>
+                                </div>
+                                <div class="admin-stat">
+                                    <span class="admin-stat-value" id="adminMonthlyUsage">0</span>
+                                    <span class="admin-stat-label">This Month</span>
+                                </div>
+                                <div class="admin-stat">
+                                    <span class="admin-stat-value" id="adminTotalUsage">0</span>
+                                    <span class="admin-stat-label">All Time</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="admin-section">
+                            <h3>Quota Settings</h3>
+                            <div class="setting-item">
+                                <label>User Tier</label>
+                                <select id="userTier" onchange="updateQuota()">
+                                    <option value="free">Free (50/day)</option>
+                                    <option value="premium">Premium (1000/day)</option>
+                                    <option value="unlimited">Unlimited</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <label>Daily Limit</label>
+                                <input type="number" id="dailyLimit" value="50" onchange="updateQuota()">
+                            </div>
+                        </div>
+                        <div class="admin-section">
+                            <h3>Actions</h3>
+                            <button onclick="resetDailyUsage()" class="secondary-btn full-width">
+                                🔄 Reset Daily Counter
+                            </button>
+                            <button onclick="exportUsageReport()" class="secondary-btn full-width">
+                                📊 Export Usage Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div class="toast-container" id="toastContainer"></div>
+
+        <!-- Achievement Popup -->
+        <div class="achievement-popup" id="achievementPopup" style="display: none;">
+            <div class="achievement-popup-content">
+                <span class="achievement-icon" id="popupAchievementIcon">🏆</span>
+                <div class="achievement-info">
+                    <span class="achievement-title" id="popupAchievementTitle">Achievement Unlocked!</span>
+                    <span class="achievement-name" id="popupAchievementName"></span>
                 </div>
             </div>
         </div>
