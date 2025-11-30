@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lemon Math - AI Math Problem Solver</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">🍋</span>
+                <h1>Lemon Math</h1>
+            </div>
+            <p class="tagline">AI-Powered Math Problem Solver</p>
+        </header>
+
+        <!-- API Key Section -->
+        <div class="api-key-section" id="apiKeySection">
+            <div class="card">
+                <h2>🔑 Setup Your API Key</h2>
+                <p>Enter your Google Gemini API key to get started. <a href="https://aistudio.google.com/apikey" target="_blank">Get a free key here</a></p>
+                <div class="input-group">
+                    <input type="password" id="apiKeyInput" placeholder="Enter your Gemini API key">
+                    <button onclick="toggleApiKeyVisibility()" class="icon-btn" id="toggleKeyBtn">👁️</button>
+                </div>
+                <button onclick="saveApiKey()" class="primary-btn">Save & Continue</button>
+                <p class="hint">💡 Your key is stored locally in your browser</p>
+            </div>
+        </div>
+
+        <!-- Main App Section -->
+        <div class="main-app" id="mainApp" style="display: none;">
+            <!-- Upload Section -->
+            <div class="upload-section">
+                <div class="card upload-card">
+                    <h2>📸 Scan Your Math Problem</h2>
+                    <p>Take a photo or upload an image of any handwritten or printed math problem</p>
+
+                    <div class="upload-options">
+                        <label class="upload-btn primary-btn">
+                            <span>📷 Take Photo</span>
+                            <input type="file" accept="image/*" capture="environment" onchange="handleImageUpload(event)" hidden>
+                        </label>
+                        <label class="upload-btn secondary-btn">
+                            <span>📁 Upload Image</span>
+                            <input type="file" accept="image/*" onchange="handleImageUpload(event)" hidden>
+                        </label>
+                    </div>
+
+                    <!-- Image Preview -->
+                    <div class="image-preview" id="imagePreview" style="display: none;">
+                        <img id="previewImg" src="" alt="Preview">
+                        <button onclick="clearImage()" class="clear-btn">✕ Clear</button>
+                    </div>
+
+                    <!-- Solve Button -->
+                    <button onclick="solveProblem()" class="solve-btn" id="solveBtn" disabled>
+                        <span class="solve-icon">✨</span>
+                        <span>Solve Problem</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading-section" id="loadingSection" style="display: none;">
+                <div class="card">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">Analyzing your math problem...</p>
+                    <p class="loading-subtext">This usually takes 5-10 seconds</p>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <!-- Recognized Problem -->
+                <div class="card result-card">
+                    <div class="result-header">
+                        <span class="result-icon">📝</span>
+                        <h3>Recognized Problem</h3>
+                        <span class="confidence-badge" id="confidenceBadge">95% confident</span>
+                    </div>
+                    <div class="problem-text" id="recognizedText"></div>
+                    <div class="problem-type" id="problemType"></div>
+                </div>
+
+                <!-- Solution -->
+                <div class="card result-card solution-card">
+                    <div class="result-header">
+                        <span class="result-icon">🎯</span>
+                        <h3>Solution</h3>
+                    </div>
+                    <div class="solution-text" id="solutionText"></div>
+                </div>
+
+                <!-- Steps -->
+                <div class="card result-card">
+                    <div class="result-header">
+                        <span class="result-icon">📚</span>
+                        <h3>Step-by-Step Solution</h3>
+                    </div>
+                    <div class="steps-container" id="stepsContainer"></div>
+                </div>
+
+                <!-- Alternative Methods -->
+                <div class="card result-card" id="alternativeMethodsCard" style="display: none;">
+                    <div class="result-header">
+                        <span class="result-icon">💡</span>
+                        <h3>Alternative Methods</h3>
+                    </div>
+                    <div class="alternatives-container" id="alternativesContainer"></div>
+                </div>
+
+                <!-- Real World Examples -->
+                <div class="card result-card" id="realWorldCard" style="display: none;">
+                    <div class="result-header">
+                        <span class="result-icon">🌍</span>
+                        <h3>Real-World Applications</h3>
+                    </div>
+                    <div class="examples-container" id="examplesContainer"></div>
+                </div>
+
+                <!-- Actions -->
+                <div class="result-actions">
+                    <button onclick="newProblem()" class="primary-btn">Solve Another Problem</button>
+                    <button onclick="copyResults()" class="secondary-btn">📋 Copy Results</button>
+                </div>
+            </div>
+
+            <!-- Error Section -->
+            <div class="error-section" id="errorSection" style="display: none;">
+                <div class="card error-card">
+                    <span class="error-icon">⚠️</span>
+                    <h3>Oops! Something went wrong</h3>
+                    <p id="errorMessage"></p>
+                    <button onclick="newProblem()" class="primary-btn">Try Again</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Button -->
+        <button class="settings-btn" onclick="showSettings()" id="settingsBtn" style="display: none;">
+            ⚙️
+        </button>
+
+        <!-- Settings Modal -->
+        <div class="modal" id="settingsModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>⚙️ Settings</h2>
+                    <button onclick="closeSettings()" class="close-btn">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="setting-item">
+                        <label>API Key</label>
+                        <div class="input-group">
+                            <input type="password" id="settingsApiKey" placeholder="Your Gemini API key">
+                            <button onclick="updateApiKey()" class="icon-btn">💾</button>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label>Language</label>
+                        <select id="languageSelect">
+                            <option value="english">English</option>
+                            <option value="greek">Greek (Ελληνικά)</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="includeAlternatives" checked>
+                            Show alternative methods
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="includeExamples" checked>
+                            Show real-world examples
+                        </label>
+                    </div>
+                    <button onclick="clearApiKey()" class="danger-btn">🗑️ Clear API Key & Data</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Made with 🍋 for math learners everywhere</p>
+            <p class="footer-links">
+                <a href="privacy-policy.html" target="_blank">Privacy Policy</a>
+            </p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
