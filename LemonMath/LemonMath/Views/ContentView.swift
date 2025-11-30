@@ -39,6 +39,9 @@ struct MainTabView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var settingsManager: SettingsManager
 
+    @AppStorage("hasSeenScanningTutorial") private var hasSeenScanningTutorial = false
+    @State private var showTutorial = false
+
     var body: some View {
         TabView(selection: $appState.currentTab) {
             HomeView()
@@ -62,6 +65,18 @@ struct MainTabView: View {
         .tint(LemonMathColors.accent)
         .onAppear {
             setupTabBarAppearance()
+            // Show tutorial for first-time users after a brief delay
+            if !hasSeenScanningTutorial {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    showTutorial = true
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $showTutorial) {
+            InteractiveTutorialView {
+                hasSeenScanningTutorial = true
+            }
+            .environmentObject(settingsManager)
         }
     }
 

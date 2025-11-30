@@ -14,6 +14,7 @@ struct SettingsView: View {
     @State private var showResetConfirmation = false
     @State private var showClearHistoryConfirmation = false
     @State private var showAchievements = false
+    @State private var showTutorial = false
     @State private var themeTransitionProgress: CGFloat = 0
 
     var body: some View {
@@ -51,6 +52,12 @@ struct SettingsView: View {
             .navigationTitle("Settings")
             .sheet(isPresented: $showAchievements) {
                 AchievementsView()
+            }
+            .fullScreenCover(isPresented: $showTutorial) {
+                InteractiveTutorialView {
+                    // Tutorial completed
+                }
+                .environmentObject(settingsManager)
             }
             .alert("Reset Settings", isPresented: $showResetConfirmation) {
                 Button("Cancel", role: .cancel) {}
@@ -302,6 +309,17 @@ struct SettingsView: View {
     // MARK: - About Section
     private var aboutSection: some View {
         SettingsSection(title: "About", icon: "info.circle.fill") {
+            // Replay Tutorial button
+            Button {
+                showTutorial = true
+            } label: {
+                SettingsRowButton(
+                    icon: "play.circle.fill",
+                    title: "Replay Tutorial",
+                    color: LemonMathColors.accent
+                )
+            }
+
             SettingsRow(icon: "number", title: "Version") {
                 Text("1.0.0")
                     .foregroundStyle(Color.adaptiveSecondaryText)
