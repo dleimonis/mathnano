@@ -16,9 +16,12 @@ struct SettingsView: View {
     @State private var showAchievements = false
     @State private var showTutorial = false
     @State private var showAdminDashboard = false
+    @State private var showAPIKeySheet = false
+    @State private var showPrivacyPolicy = false
     @State private var themeTransitionProgress: CGFloat = 0
 
     @StateObject private var usageManager = APIUsageManager.shared
+    @AppStorage("geminiAPIKey") private var storedAPIKey = ""
 
     var body: some View {
         NavigationStack {
@@ -33,6 +36,9 @@ struct SettingsView: View {
 
                         // Usage quota section
                         usageQuotaSection
+
+                        // API Configuration section
+                        apiConfigSection
 
                         // Appearance section
                         appearanceSection
@@ -62,6 +68,12 @@ struct SettingsView: View {
             .sheet(isPresented: $showAdminDashboard) {
                 AdminDashboardView()
                     .environmentObject(settingsManager)
+            }
+            .sheet(isPresented: $showAPIKeySheet) {
+                APIKeyConfigView(apiKey: $storedAPIKey)
+            }
+            .sheet(isPresented: $showPrivacyPolicy) {
+                PrivacyPolicyView()
             }
             .fullScreenCover(isPresented: $showTutorial) {
                 InteractiveTutorialView {
@@ -213,6 +225,50 @@ struct SettingsView: View {
         .padding()
         .background(Color.adaptiveCardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    // MARK: - API Configuration Section
+    private var apiConfigSection: some View {
+        SettingsSection(title: "API Configuration", icon: "key.fill") {
+            Button {
+                showAPIKeySheet = true
+            } label: {
+                HStack {
+                    Image(systemName: storedAPIKey.isEmpty ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
+                        .foregroundStyle(storedAPIKey.isEmpty ? .orange : .green)
+                        .frame(width: 24)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Gemini API Key")
+                            .foregroundStyle(Color.adaptivePrimaryText)
+
+                        Text(storedAPIKey.isEmpty ? "Not configured" : "Key configured")
+                            .font(.caption)
+                            .foregroundStyle(Color.adaptiveSecondaryText)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(Color.adaptiveSecondaryText)
+                }
+                .padding()
+            }
+
+            if storedAPIKey.isEmpty {
+                HStack(spacing: 8) {
+                    Image(systemName: "info.circle")
+                        .foregroundStyle(.blue)
+
+                    Text("Get your free API key from Google AI Studio")
+                        .font(.caption)
+                        .foregroundStyle(Color.adaptiveSecondaryText)
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 12)
+            }
+        }
     }
 
     // MARK: - Appearance Section
@@ -431,7 +487,7 @@ struct SettingsView: View {
             }
 
             Button {
-                // Privacy policy
+                showPrivacyPolicy = true
             } label: {
                 SettingsRowButton(
                     icon: "doc.text.fill",
@@ -439,6 +495,292 @@ struct SettingsView: View {
                     color: .gray
                 )
             }
+        }
+    }
+}
+
+// MARK: - API Key Configuration View
+struct APIKeyConfigView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var apiKey: String
+    @State private var inputKey = ""
+    @State private var showKey = false
+    @FocusState private var isInputFocused: Bool
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Header
+                    VStack(spacing: 12) {
+                        Image(systemName: "key.fill")
+                            .font(.system(size: 50))
+                            .foregroundStyle(LemonMathColors.accent)
+
+                        Text("Gemini API Key")
+                            .font(.title2)
+                            .fontWeight(.bold)
+
+                        Text("Enter your Google Gemini API key to enable AI-powered math solving.")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.adaptiveSecondaryText)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.top, 20)
+
+                    // API Key Input
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("API Key")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+
+                        HStack {
+                            if showKey {
+                                TextField("Enter your API key", text: $inputKey)
+                                    .textContentType(.password)
+                                    .autocapitalization(.none)
+                                    .autocorrectionDisabled()
+                                    .focused($isInputFocused)
+                            } else {
+                                SecureField("Enter your API key", text: $inputKey)
+                                    .textContentType(.password)
+                                    .focused($isInputFocused)
+                            }
+
+                            Button {
+                                showKey.toggle()
+                            } label: {
+                                Image(systemName: showKey ? "eye.slash" : "eye")
+                                    .foregroundStyle(Color.adaptiveSecondaryText)
+                            }
+                        }
+                        .padding()
+                        .background(Color.adaptiveCardBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(isInputFocused ? LemonMathColors.accent : Color.clear, lineWidth: 2)
+                        )
+                    }
+
+                    // Instructions
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("How to get your API key:")
+                            .font(.headline)
+
+                        InstructionRow(number: 1, text: "Go to Google AI Studio")
+                        InstructionRow(number: 2, text: "Sign in with your Google account")
+                        InstructionRow(number: 3, text: "Click \"Get API Key\" in the left menu")
+                        InstructionRow(number: 4, text: "Create a new API key or copy existing one")
+                        InstructionRow(number: 5, text: "Paste the key above")
+
+                        Link(destination: URL(string: "https://aistudio.google.com/apikey")!) {
+                            HStack {
+                                Image(systemName: "safari")
+                                Text("Open Google AI Studio")
+                            }
+                            .font(.subheadline)
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                    }
+                    .padding()
+                    .background(Color.adaptiveCardBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+
+                    // Pricing info
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Image(systemName: "dollarsign.circle")
+                                .foregroundStyle(.green)
+                            Text("Free Tier Available")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                        }
+
+                        Text("Google offers a free tier with 15 requests/minute. Perfect for personal use!")
+                            .font(.caption)
+                            .foregroundStyle(Color.adaptiveSecondaryText)
+                    }
+                    .padding()
+                    .background(Color.green.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                    Spacer(minLength: 40)
+                }
+                .padding()
+            }
+            .navigationTitle("API Setup")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Save") {
+                        apiKey = inputKey.trimmingCharacters(in: .whitespacesAndNewlines)
+                        dismiss()
+                    }
+                    .fontWeight(.semibold)
+                    .disabled(inputKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+        }
+        .onAppear {
+            inputKey = apiKey
+        }
+    }
+}
+
+struct InstructionRow: View {
+    let number: Int
+    let text: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Text("\(number)")
+                .font(.caption)
+                .fontWeight(.bold)
+                .foregroundStyle(.white)
+                .frame(width: 24, height: 24)
+                .background(LemonMathColors.accent)
+                .clipShape(Circle())
+
+            Text(text)
+                .font(.subheadline)
+                .foregroundStyle(Color.adaptivePrimaryText)
+        }
+    }
+}
+
+// MARK: - Privacy Policy View
+struct PrivacyPolicyView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("Last updated: November 2025")
+                        .font(.caption)
+                        .foregroundStyle(Color.adaptiveSecondaryText)
+
+                    PolicySection(title: "Introduction") {
+                        Text("Lemon Math (\"the App\") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our mobile application.")
+                    }
+
+                    PolicySection(title: "Information We Collect") {
+                        VStack(alignment: .leading, spacing: 12) {
+                            PolicyBullet(text: "Images: Photos of math problems you scan are sent to Google's Gemini AI for analysis. Images are not stored on our servers.")
+                            PolicyBullet(text: "Usage Data: We collect anonymous usage statistics to improve the app experience.")
+                            PolicyBullet(text: "API Key: If you provide your own Gemini API key, it is stored locally on your device.")
+                            PolicyBullet(text: "Problem History: Solved problems are stored locally on your device for your convenience.")
+                        }
+                    }
+
+                    PolicySection(title: "How We Use Your Information") {
+                        VStack(alignment: .leading, spacing: 12) {
+                            PolicyBullet(text: "To provide math problem solving services")
+                            PolicyBullet(text: "To display your problem history")
+                            PolicyBullet(text: "To improve app functionality")
+                            PolicyBullet(text: "To provide step-by-step explanations")
+                        }
+                    }
+
+                    PolicySection(title: "Third-Party Services") {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("The App uses Google Gemini AI to analyze math problems. When you scan a problem:")
+                                .foregroundStyle(Color.adaptivePrimaryText)
+                            PolicyBullet(text: "Your image is sent to Google's servers for processing")
+                            PolicyBullet(text: "Google's privacy policy applies to this data")
+                            PolicyBullet(text: "We recommend reviewing Google's AI privacy practices")
+
+                            Link(destination: URL(string: "https://ai.google.dev/gemini-api/terms")!) {
+                                Text("View Google Gemini API Terms")
+                                    .font(.subheadline)
+                                    .foregroundStyle(LemonMathColors.accent)
+                            }
+                        }
+                    }
+
+                    PolicySection(title: "Data Storage") {
+                        VStack(alignment: .leading, spacing: 12) {
+                            PolicyBullet(text: "All problem history is stored locally on your device")
+                            PolicyBullet(text: "Your API key is stored securely in the app's local storage")
+                            PolicyBullet(text: "We do not maintain external servers for user data")
+                            PolicyBullet(text: "Deleting the app removes all locally stored data")
+                        }
+                    }
+
+                    PolicySection(title: "Your Rights") {
+                        VStack(alignment: .leading, spacing: 12) {
+                            PolicyBullet(text: "Delete your problem history at any time in Settings")
+                            PolicyBullet(text: "Remove your API key at any time")
+                            PolicyBullet(text: "Use offline mode to prevent data transmission")
+                            PolicyBullet(text: "Request information about your data by contacting us")
+                        }
+                    }
+
+                    PolicySection(title: "Children's Privacy") {
+                        Text("The App is designed to be educational and safe for users of all ages. We do not knowingly collect personal information from children under 13 without parental consent.")
+                    }
+
+                    PolicySection(title: "Changes to This Policy") {
+                        Text("We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy in the app with an updated date.")
+                    }
+
+                    PolicySection(title: "Contact Us") {
+                        Text("If you have questions about this Privacy Policy, please contact us at: support@lemonmath.app")
+                    }
+
+                    Spacer(minLength: 40)
+                }
+                .padding()
+            }
+            .navigationTitle("Privacy Policy")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct PolicySection<Content: View>: View {
+    let title: String
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.headline)
+                .foregroundStyle(Color.adaptivePrimaryText)
+
+            content()
+                .font(.subheadline)
+                .foregroundStyle(Color.adaptiveSecondaryText)
+        }
+    }
+}
+
+struct PolicyBullet: View {
+    let text: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Text("•")
+                .foregroundStyle(LemonMathColors.accent)
+            Text(text)
         }
     }
 }

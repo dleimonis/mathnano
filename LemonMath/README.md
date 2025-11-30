@@ -7,7 +7,7 @@ A magical iOS app that solves handwritten math problems with beautiful animation
 ### Core Functionality
 - **Scan Math Problems**: Point your camera at any handwritten or printed math problem
 - **Apple Pencil Support**: Write directly on iPad using Apple Pencil
-- **AI-Powered Solutions**: Uses Nano Banana Pro model for accurate problem solving
+- **AI-Powered Solutions**: Uses Google Gemini AI for accurate problem solving
 - **Animated Solutions**: Watch solutions appear with beautiful handwriting animations
 - **Step-by-Step Explanations**: Understand the "why" and "how" of every step
 
@@ -60,8 +60,8 @@ A magical iOS app that solves handwritten math problems with beautiful animation
 
 1. Clone the repository
 2. Open `LemonMath.xcodeproj` in Xcode
-3. Add your Nano Banana Pro API key to the environment
-4. Build and run
+3. Build and run
+4. Open Settings in the app and add your Gemini API key
 
 ## Project Structure
 
@@ -83,7 +83,8 @@ LemonMath/
 │   ├── MathProblem.swift
 │   └── Achievement.swift
 ├── Services/
-│   ├── NanoBananaProService.swift
+│   ├── GeminiService.swift
+│   ├── APIUsageManager.swift
 │   ├── SettingsManager.swift
 │   ├── HistoryManager.swift
 │   └── AchievementManager.swift
@@ -103,7 +104,14 @@ LemonMath/
 
 ### API Key Setup
 
-Set the `NANO_BANANA_PRO_API_KEY` environment variable or add it to your xcconfig file.
+**Option 1: In-App Configuration (Recommended)**
+1. Open the app
+2. Go to Settings > API Configuration
+3. Enter your Google Gemini API key
+4. Get a free key at [Google AI Studio](https://aistudio.google.com/apikey)
+
+**Option 2: Environment Variable**
+Set the `GEMINI_API_KEY` environment variable or add it to your xcconfig file.
 
 ### Privacy Settings
 
@@ -128,4 +136,4 @@ Currently supported languages:
 
 ## License
 
-Copyright 2024. All rights reserved.
+Copyright 2025. All rights reserved.
