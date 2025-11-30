@@ -1,0 +1,250 @@
+/*
+  Localizable.strings (English)
+  LemonMath
+*/
+
+// MARK: - General
+"app_name" = "Lemon Math";
+"ok" = "OK";
+"cancel" = "Cancel";
+"done" = "Done";
+"delete" = "Delete";
+"save" = "Save";
+"share" = "Share";
+"close" = "Close";
+"next" = "Next";
+"back" = "Back";
+"retry" = "Retry";
+"loading" = "Loading...";
+"error" = "Error";
+"success" = "Success";
+
+// MARK: - Tabs
+"Home" = "Home";
+"History" = "History";
+"Settings" = "Settings";
+
+// MARK: - Home Screen
+"ready_to_solve" = "Ready to solve some math?";
+"home_subtitle" = "Take a photo of any math problem and watch the magic happen!";
+"scan_problem" = "Scan Problem";
+"photo_library" = "Photo Library";
+"type_problem" = "Type Problem";
+"recent_problems" = "Recent Problems";
+"see_all" = "See All";
+"no_problems_yet" = "No problems yet";
+"scan_first_problem" = "Scan your first math problem to get started!";
+
+// MARK: - Camera
+"position_problem" = "Position the math problem within the frame";
+"good_lighting" = "Good lighting";
+"clear_writing" = "Clear writing";
+"full_problem" = "Full problem";
+"capture_photo" = "Capture photo";
+"retake" = "Retake";
+"use_photo" = "Use Photo";
+"is_problem_visible" = "Is the problem clearly visible?";
+
+// MARK: - Processing
+"analyzing_image" = "Analyzing image...";
+"recognizing_handwriting" = "Recognizing handwriting...";
+"solving_problem" = "Solving problem...";
+"generating_solution" = "Generating solution...";
+"almost_done" = "Almost done...";
+"working_on_solution" = "Working on your solution...";
+
+// MARK: - Solution
+"solution" = "Solution";
+"answer" = "Answer";
+"solution_steps" = "Solution Steps";
+"more_steps" = "+ %d more steps";
+"explain" = "Explain";
+"challenge" = "Challenge";
+
+// MARK: - Explanation
+"steps" = "Steps";
+"other_methods" = "Other Methods";
+"real_world" = "Real World";
+"graph" = "Graph";
+"problem" = "Problem";
+"final_answer" = "Final Answer";
+"explanation" = "Explanation";
+"concept" = "Concept";
+"no_alternatives" = "No Alternatives";
+"one_standard_method" = "This problem has one standard solution method";
+"no_examples_yet" = "No Examples Yet";
+"real_world_coming_soon" = "Real-world applications coming soon";
+"how_it_applies" = "How it applies";
+
+// MARK: - History
+"no_history_yet" = "No History Yet";
+"solve_first_problem" = "Solve your first problem and it will appear here!";
+"total" = "Total";
+"streak" = "Streak";
+"day_streak" = "Day Streak";
+"favorites" = "Favorites";
+"search_problems" = "Search problems...";
+"all" = "All";
+"today" = "Today";
+"yesterday" = "Yesterday";
+"this_week" = "This Week";
+"delete_problem" = "Delete Problem";
+"delete_confirmation" = "Are you sure you want to delete this problem from your history?";
+"newest_first" = "Newest First";
+"oldest_first" = "Oldest First";
+"alphabetical" = "Alphabetical";
+"most_shared" = "Most Shared";
+"filtered" = "Filtered";
+
+// MARK: - Settings
+"appearance" = "Appearance";
+"dark_mode" = "Dark Mode";
+"light_mode" = "Light Mode";
+"use_system_appearance" = "Use System Appearance";
+"tap_to_switch" = "Tap to switch theme";
+"animation_speed" = "Animation Speed";
+"slow" = "Slow";
+"normal" = "Normal";
+"fast" = "Fast";
+"accessibility" = "Accessibility";
+"large_text" = "Large Text";
+"text_size" = "Text Size";
+"voice_guidance" = "Voice Guidance";
+"haptic_feedback" = "Haptic Feedback";
+"language" = "Language";
+"privacy" = "Privacy";
+"offline_mode" = "Offline Mode";
+"privacy_level" = "Privacy Level";
+"minimal" = "Minimal";
+"standard" = "Standard";
+"maximum_privacy" = "Maximum Privacy";
+"minimal_desc" = "Basic analytics for app improvement";
+"standard_desc" = "No personal data uploaded, local processing when possible";
+"maximum_desc" = "Full offline mode, no data leaves your device";
+"data" = "Data";
+"auto_save" = "Auto-save Problems";
+"export_history" = "Export History";
+"clear_history" = "Clear History";
+"reset_settings" = "Reset All Settings";
+"reset_confirmation" = "This will reset all settings to their default values.";
+"clear_history_confirmation" = "This will permanently delete all your problem history.";
+"about" = "About";
+"version" = "Version";
+"rate_app" = "Rate Lemon Math";
+"send_feedback" = "Send Feedback";
+"privacy_policy" = "Privacy Policy";
+
+// MARK: - Achievements
+"achievements" = "Achievements";
+"achievements_unlocked" = "Achievements Unlocked";
+"complete" = "Complete";
+"view_all_achievements" = "View All Achievements";
+"achievement_unlocked" = "Achievement Unlocked!";
+"awesome" = "Awesome!";
+
+// Achievement Titles
+"first_steps" = "First Steps";
+"getting_started" = "Getting Started";
+"math_enthusiast" = "Math Enthusiast";
+"math_wizard" = "Math Wizard";
+"math_master" = "Math Master";
+"on_a_roll" = "On a Roll";
+"week_warrior" = "Week Warrior";
+"monthly_maven" = "Monthly Maven";
+"sharing_is_caring" = "Sharing is Caring";
+"social_butterfly" = "Social Butterfly";
+"explorer" = "Explorer";
+"polyglot" = "Polyglot";
+"algebra_ace" = "Algebra Ace";
+"calculus_champion" = "Calculus Champion";
+"geometry_genius" = "Geometry Genius";
+
+// Achievement Descriptions
+"solve_first" = "Solve your first math problem";
+"solve_10" = "Solve 10 math problems";
+"solve_50" = "Solve 50 math problems";
+"solve_100" = "Solve 100 math problems";
+"solve_500" = "Solve 500 math problems";
+"streak_3" = "Use the app 3 days in a row";
+"streak_7" = "Use the app 7 days in a row";
+"streak_30" = "Use the app 30 days in a row";
+"share_first" = "Share your first solution";
+"share_10" = "Share 10 solutions";
+"try_all_types" = "Solve problems from all math categories";
+"use_multi_language" = "Use the app in multiple languages";
+"solve_25_algebra" = "Solve 25 algebra problems";
+"solve_25_calculus" = "Solve 25 calculus problems";
+"solve_25_geometry" = "Solve 25 geometry problems";
+
+// Categories
+"problem_solver" = "Problem Solver";
+"consistency" = "Consistency";
+"social" = "Social";
+"mastery" = "Mastery";
+
+// MARK: - Math Types
+"Algebra" = "Algebra";
+"Geometry" = "Geometry";
+"Calculus" = "Calculus";
+"Trigonometry" = "Trigonometry";
+"Statistics" = "Statistics";
+"Linear Algebra" = "Linear Algebra";
+"Number Theory" = "Number Theory";
+"Arithmetic" = "Arithmetic";
+"Math" = "Math";
+
+// Difficulty
+"Beginner" = "Beginner";
+"Intermediate" = "Intermediate";
+"Advanced" = "Advanced";
+
+// MARK: - Sharing
+"share_solution" = "Share Solution";
+"share_format" = "Share Format";
+"preview" = "Preview";
+"include" = "Include";
+"step_by_step_solution" = "Step-by-step solution";
+"my_notes" = "My notes";
+"add_message" = "Add a message (optional)";
+"messages" = "Messages";
+"airdrop" = "AirDrop";
+"copy" = "Copy";
+"challenge_friend" = "Challenge a Friend";
+"image" = "Image";
+"pdf" = "PDF";
+"text" = "Text";
+"generating" = "Generating...";
+"can_you_solve" = "Can you solve this?";
+
+// MARK: - Onboarding
+"scan_any_problem" = "Scan Any Math Problem";
+"scan_subtitle" = "Point your camera at handwritten or printed math problems";
+"algebra_geometry_calculus" = "Algebra, Geometry, Calculus";
+"handwriting_recognition" = "Handwriting recognition";
+"sloppy_handwriting" = "Sloppy handwriting? No problem!";
+"watch_magic" = "Watch the Magic Happen";
+"magic_subtitle" = "See your solution appear with beautiful animations";
+"animated_handwriting" = "Animated handwriting effect";
+"glowing_ink" = "Glowing ink magic";
+"under_10_seconds" = "Under 10 seconds!";
+"understand_every_step" = "Understand Every Step";
+"understand_subtitle" = "Learn the 'why' and 'how' with detailed explanations";
+"step_breakdowns" = "Step-by-step breakdowns";
+"alternative_methods" = "Alternative methods";
+"real_world_examples" = "Real-world examples";
+"learn_have_fun" = "Learn & Have Fun";
+"fun_subtitle" = "Track your progress and challenge friends";
+"build_streaks" = "Build solving streaks";
+"challenge_friends" = "Challenge friends";
+"unlock_achievements" = "Unlock achievements";
+"skip" = "Skip";
+"get_started" = "Get Started";
+"choose_language" = "Choose Your Language";
+"change_later" = "You can change this later in Settings";
+
+// MARK: - Errors
+"error_invalid_image" = "Could not process the image";
+"error_network" = "Network connection error";
+"error_server" = "Server is temporarily unavailable";
+"error_unknown" = "An unknown error occurred";
+"try_again" = "Please try again";

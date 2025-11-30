@@ -1,0 +1,250 @@
+/*
+  Localizable.strings (Greek)
+  LemonMath
+*/
+
+// MARK: - General
+"app_name" = "Lemon Math";
+"ok" = "OK";
+"cancel" = "Ακύρωση";
+"done" = "Τέλος";
+"delete" = "Διαγραφή";
+"save" = "Αποθήκευση";
+"share" = "Κοινοποίηση";
+"close" = "Κλείσιμο";
+"next" = "Επόμενο";
+"back" = "Πίσω";
+"retry" = "Επανάληψη";
+"loading" = "Φόρτωση...";
+"error" = "Σφάλμα";
+"success" = "Επιτυχία";
+
+// MARK: - Tabs
+"Home" = "Αρχική";
+"History" = "Ιστορικό";
+"Settings" = "Ρυθμίσεις";
+
+// MARK: - Home Screen
+"ready_to_solve" = "Έτοιμοι να λύσουμε μαθηματικά;";
+"home_subtitle" = "Τράβηξε φωτογραφία οποιουδήποτε μαθηματικού προβλήματος και δες τη μαγεία!";
+"scan_problem" = "Σάρωση Προβλήματος";
+"photo_library" = "Βιβλιοθήκη Φωτογραφιών";
+"type_problem" = "Πληκτρολόγηση";
+"recent_problems" = "Πρόσφατα Προβλήματα";
+"see_all" = "Δες Όλα";
+"no_problems_yet" = "Κανένα πρόβλημα ακόμα";
+"scan_first_problem" = "Σάρωσε το πρώτο σου μαθηματικό πρόβλημα για να ξεκινήσεις!";
+
+// MARK: - Camera
+"position_problem" = "Τοποθέτησε το πρόβλημα μέσα στο πλαίσιο";
+"good_lighting" = "Καλός φωτισμός";
+"clear_writing" = "Καθαρή γραφή";
+"full_problem" = "Πλήρες πρόβλημα";
+"capture_photo" = "Λήψη φωτογραφίας";
+"retake" = "Νέα Λήψη";
+"use_photo" = "Χρήση Φωτογραφίας";
+"is_problem_visible" = "Είναι το πρόβλημα ευδιάκριτο;";
+
+// MARK: - Processing
+"analyzing_image" = "Ανάλυση εικόνας...";
+"recognizing_handwriting" = "Αναγνώριση γραφικού χαρακτήρα...";
+"solving_problem" = "Επίλυση προβλήματος...";
+"generating_solution" = "Δημιουργία λύσης...";
+"almost_done" = "Σχεδόν έτοιμο...";
+"working_on_solution" = "Δουλεύουμε τη λύση σου...";
+
+// MARK: - Solution
+"solution" = "Λύση";
+"answer" = "Απάντηση";
+"solution_steps" = "Βήματα Λύσης";
+"more_steps" = "+ %d ακόμα βήματα";
+"explain" = "Εξήγηση";
+"challenge" = "Πρόκληση";
+
+// MARK: - Explanation
+"steps" = "Βήματα";
+"other_methods" = "Άλλες Μέθοδοι";
+"real_world" = "Πραγματικός Κόσμος";
+"graph" = "Γράφημα";
+"problem" = "Πρόβλημα";
+"final_answer" = "Τελική Απάντηση";
+"explanation" = "Εξήγηση";
+"concept" = "Έννοια";
+"no_alternatives" = "Χωρίς Εναλλακτικές";
+"one_standard_method" = "Αυτό το πρόβλημα έχει μία τυπική μέθοδο λύσης";
+"no_examples_yet" = "Χωρίς Παραδείγματα Ακόμα";
+"real_world_coming_soon" = "Εφαρμογές πραγματικού κόσμου σύντομα";
+"how_it_applies" = "Πώς εφαρμόζεται";
+
+// MARK: - History
+"no_history_yet" = "Χωρίς Ιστορικό Ακόμα";
+"solve_first_problem" = "Λύσε το πρώτο σου πρόβλημα και θα εμφανιστεί εδώ!";
+"total" = "Σύνολο";
+"streak" = "Σερί";
+"day_streak" = "Ημερήσιο Σερί";
+"favorites" = "Αγαπημένα";
+"search_problems" = "Αναζήτηση προβλημάτων...";
+"all" = "Όλα";
+"today" = "Σήμερα";
+"yesterday" = "Χθες";
+"this_week" = "Αυτή την Εβδομάδα";
+"delete_problem" = "Διαγραφή Προβλήματος";
+"delete_confirmation" = "Είσαι σίγουρος ότι θέλεις να διαγράψεις αυτό το πρόβλημα από το ιστορικό σου;";
+"newest_first" = "Νεότερα Πρώτα";
+"oldest_first" = "Παλαιότερα Πρώτα";
+"alphabetical" = "Αλφαβητικά";
+"most_shared" = "Περισσότερες Κοινοποιήσεις";
+"filtered" = "Φιλτραρισμένα";
+
+// MARK: - Settings
+"appearance" = "Εμφάνιση";
+"dark_mode" = "Σκοτεινή Λειτουργία";
+"light_mode" = "Φωτεινή Λειτουργία";
+"use_system_appearance" = "Χρήση Εμφάνισης Συστήματος";
+"tap_to_switch" = "Πάτα για εναλλαγή θέματος";
+"animation_speed" = "Ταχύτητα Κίνησης";
+"slow" = "Αργά";
+"normal" = "Κανονικά";
+"fast" = "Γρήγορα";
+"accessibility" = "Προσβασιμότητα";
+"large_text" = "Μεγάλο Κείμενο";
+"text_size" = "Μέγεθος Κειμένου";
+"voice_guidance" = "Φωνητική Καθοδήγηση";
+"haptic_feedback" = "Απτική Ανάδραση";
+"language" = "Γλώσσα";
+"privacy" = "Απόρρητο";
+"offline_mode" = "Λειτουργία Εκτός Σύνδεσης";
+"privacy_level" = "Επίπεδο Απορρήτου";
+"minimal" = "Ελάχιστο";
+"standard" = "Τυπικό";
+"maximum_privacy" = "Μέγιστο Απόρρητο";
+"minimal_desc" = "Βασικά αναλυτικά για βελτίωση εφαρμογής";
+"standard_desc" = "Χωρίς μεταφόρτωση προσωπικών δεδομένων, τοπική επεξεργασία όταν είναι δυνατό";
+"maximum_desc" = "Πλήρης λειτουργία εκτός σύνδεσης, κανένα δεδομένο δεν φεύγει από τη συσκευή σου";
+"data" = "Δεδομένα";
+"auto_save" = "Αυτόματη Αποθήκευση Προβλημάτων";
+"export_history" = "Εξαγωγή Ιστορικού";
+"clear_history" = "Διαγραφή Ιστορικού";
+"reset_settings" = "Επαναφορά Όλων των Ρυθμίσεων";
+"reset_confirmation" = "Αυτό θα επαναφέρει όλες τις ρυθμίσεις στις προεπιλεγμένες τιμές.";
+"clear_history_confirmation" = "Αυτό θα διαγράψει μόνιμα όλο το ιστορικό προβλημάτων σου.";
+"about" = "Σχετικά";
+"version" = "Έκδοση";
+"rate_app" = "Βαθμολόγησε το Lemon Math";
+"send_feedback" = "Αποστολή Σχολίων";
+"privacy_policy" = "Πολιτική Απορρήτου";
+
+// MARK: - Achievements
+"achievements" = "Επιτεύγματα";
+"achievements_unlocked" = "Ξεκλειδωμένα Επιτεύγματα";
+"complete" = "Ολοκληρωμένο";
+"view_all_achievements" = "Δες Όλα τα Επιτεύγματα";
+"achievement_unlocked" = "Επίτευγμα Ξεκλειδώθηκε!";
+"awesome" = "Τέλεια!";
+
+// Achievement Titles
+"first_steps" = "Πρώτα Βήματα";
+"getting_started" = "Ξεκίνημα";
+"math_enthusiast" = "Λάτρης Μαθηματικών";
+"math_wizard" = "Μάγος Μαθηματικών";
+"math_master" = "Δάσκαλος Μαθηματικών";
+"on_a_roll" = "Σε Φόρμα";
+"week_warrior" = "Πολεμιστής Εβδομάδας";
+"monthly_maven" = "Μηνιαίος Ειδικός";
+"sharing_is_caring" = "Η Κοινοποίηση είναι Φροντίδα";
+"social_butterfly" = "Κοινωνική Πεταλούδα";
+"explorer" = "Εξερευνητής";
+"polyglot" = "Πολύγλωσσος";
+"algebra_ace" = "Άσος Άλγεβρας";
+"calculus_champion" = "Πρωταθλητής Λογισμού";
+"geometry_genius" = "Ιδιοφυΐα Γεωμετρίας";
+
+// Achievement Descriptions
+"solve_first" = "Λύσε το πρώτο σου μαθηματικό πρόβλημα";
+"solve_10" = "Λύσε 10 μαθηματικά προβλήματα";
+"solve_50" = "Λύσε 50 μαθηματικά προβλήματα";
+"solve_100" = "Λύσε 100 μαθηματικά προβλήματα";
+"solve_500" = "Λύσε 500 μαθηματικά προβλήματα";
+"streak_3" = "Χρησιμοποίησε την εφαρμογή 3 ημέρες συνεχόμενα";
+"streak_7" = "Χρησιμοποίησε την εφαρμογή 7 ημέρες συνεχόμενα";
+"streak_30" = "Χρησιμοποίησε την εφαρμογή 30 ημέρες συνεχόμενα";
+"share_first" = "Κοινοποίησε την πρώτη σου λύση";
+"share_10" = "Κοινοποίησε 10 λύσεις";
+"try_all_types" = "Λύσε προβλήματα από όλες τις κατηγορίες μαθηματικών";
+"use_multi_language" = "Χρησιμοποίησε την εφαρμογή σε πολλές γλώσσες";
+"solve_25_algebra" = "Λύσε 25 προβλήματα άλγεβρας";
+"solve_25_calculus" = "Λύσε 25 προβλήματα λογισμού";
+"solve_25_geometry" = "Λύσε 25 προβλήματα γεωμετρίας";
+
+// Categories
+"problem_solver" = "Λύτης Προβλημάτων";
+"consistency" = "Συνέπεια";
+"social" = "Κοινωνικό";
+"mastery" = "Εξειδίκευση";
+
+// MARK: - Math Types
+"Algebra" = "Άλγεβρα";
+"Geometry" = "Γεωμετρία";
+"Calculus" = "Λογισμός";
+"Trigonometry" = "Τριγωνομετρία";
+"Statistics" = "Στατιστική";
+"Linear Algebra" = "Γραμμική Άλγεβρα";
+"Number Theory" = "Θεωρία Αριθμών";
+"Arithmetic" = "Αριθμητική";
+"Math" = "Μαθηματικά";
+
+// Difficulty
+"Beginner" = "Αρχάριος";
+"Intermediate" = "Μέσος";
+"Advanced" = "Προχωρημένος";
+
+// MARK: - Sharing
+"share_solution" = "Κοινοποίηση Λύσης";
+"share_format" = "Μορφή Κοινοποίησης";
+"preview" = "Προεπισκόπηση";
+"include" = "Συμπερίληψη";
+"step_by_step_solution" = "Λύση βήμα-βήμα";
+"my_notes" = "Οι σημειώσεις μου";
+"add_message" = "Πρόσθεσε μήνυμα (προαιρετικό)";
+"messages" = "Μηνύματα";
+"airdrop" = "AirDrop";
+"copy" = "Αντιγραφή";
+"challenge_friend" = "Πρόκληση Φίλου";
+"image" = "Εικόνα";
+"pdf" = "PDF";
+"text" = "Κείμενο";
+"generating" = "Δημιουργία...";
+"can_you_solve" = "Μπορείς να το λύσεις;";
+
+// MARK: - Onboarding
+"scan_any_problem" = "Σάρωσε Οποιοδήποτε Μαθηματικό Πρόβλημα";
+"scan_subtitle" = "Στόχευσε την κάμερά σου σε χειρόγραφα ή τυπωμένα μαθηματικά προβλήματα";
+"algebra_geometry_calculus" = "Άλγεβρα, Γεωμετρία, Λογισμός";
+"handwriting_recognition" = "Αναγνώριση γραφής";
+"sloppy_handwriting" = "Ακατάστατη γραφή; Κανένα πρόβλημα!";
+"watch_magic" = "Δες τη Μαγεία να Συμβαίνει";
+"magic_subtitle" = "Δες τη λύση σου να εμφανίζεται με όμορφα εφέ";
+"animated_handwriting" = "Κινούμενο εφέ γραφής";
+"glowing_ink" = "Λαμπερή μελάνι μαγεία";
+"under_10_seconds" = "Κάτω από 10 δευτερόλεπτα!";
+"understand_every_step" = "Κατανόησε Κάθε Βήμα";
+"understand_subtitle" = "Μάθε το 'γιατί' και το 'πώς' με λεπτομερείς εξηγήσεις";
+"step_breakdowns" = "Αναλύσεις βήμα-βήμα";
+"alternative_methods" = "Εναλλακτικές μέθοδοι";
+"real_world_examples" = "Παραδείγματα πραγματικού κόσμου";
+"learn_have_fun" = "Μάθε & Διασκέδασε";
+"fun_subtitle" = "Παρακολούθησε την πρόοδό σου και προκάλεσε φίλους";
+"build_streaks" = "Χτίσε σερί επιλύσεων";
+"challenge_friends" = "Προκάλεσε φίλους";
+"unlock_achievements" = "Ξεκλείδωσε επιτεύγματα";
+"skip" = "Παράλειψη";
+"get_started" = "Ξεκίνα";
+"choose_language" = "Επίλεξε τη Γλώσσα σου";
+"change_later" = "Μπορείς να το αλλάξεις αργότερα στις Ρυθμίσεις";
+
+// MARK: - Errors
+"error_invalid_image" = "Δεν ήταν δυνατή η επεξεργασία της εικόνας";
+"error_network" = "Σφάλμα σύνδεσης δικτύου";
+"error_server" = "Ο διακομιστής δεν είναι διαθέσιμος προσωρινά";
+"error_unknown" = "Παρουσιάστηκε άγνωστο σφάλμα";
+"try_again" = "Παρακαλώ δοκίμασε ξανά";

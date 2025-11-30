@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Lemon Math</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<true/>
+	</dict>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchScreenBackground</string>
+		<key>UIImageName</key>
+		<string>LaunchIcon</string>
+	</dict>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>arm64</string>
+	</array>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UIUserInterfaceStyle</key>
+	<string>Light</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+
+	<!-- Camera Permission -->
+	<key>NSCameraUsageDescription</key>
+	<string>Lemon Math needs camera access to scan and solve math problems from your photos or handwritten notes.</string>
+
+	<!-- Photo Library Permission -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Lemon Math needs access to your photo library to select images of math problems to solve.</string>
+
+	<!-- Speech Recognition Permission (for voice guidance) -->
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Lemon Math can use speech recognition to help you input math problems by voice.</string>
+
+	<!-- Microphone Permission (for voice input) -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Lemon Math uses the microphone to listen for voice commands and math problem dictation.</string>
+
+	<!-- Supported Languages -->
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>el</string>
+	</array>
+
+	<!-- API Keys (should be in a secure location in production) -->
+	<key>NANO_BANANA_PRO_API_KEY</key>
+	<string>$(NANO_BANANA_PRO_API_KEY)</string>
+
+	<!-- App Transport Security -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>api.nanobananapro.ai</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<false/>
+				<key>NSExceptionRequiresForwardSecrecy</key>
+				<true/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
+
+	<!-- Background Modes -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>processing</string>
+	</array>
+
+	<!-- Accessibility -->
+	<key>UIAccessibilityAnnounceAllChanges</key>
+	<true/>
+
+	<!-- App Category -->
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.education</string>
+
+	<!-- Minimum OS Version -->
+	<key>MinimumOSVersion</key>
+	<string>17.0</string>
+
+	<!-- Supports Apple Pencil -->
+	<key>UISupportsApplePencil</key>
+	<true/>
+</dict>
+</plist>
