@@ -13,6 +13,9 @@ let canvas = null;
 let ctx = null;
 let adminPressTimer = null;
 let lastResult = null;
+let currentFilter = 'all';
+let currentSort = 'newest';
+let mathChart = null;
 
 // ==================== ACHIEVEMENTS DEFINITION ====================
 const ACHIEVEMENTS = [
@@ -560,6 +563,9 @@ function displayResults(result) {
     // Real World Examples
     displayExamples(result.realWorldExamples);
 
+    // Graph Visualization
+    displayGraph(result.graphData);
+
     // Scroll to results
     document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
     triggerHaptic('success');
@@ -649,7 +655,10 @@ function saveToHistory(result) {
         solution: result.solution,
         type: result.problemType,
         date: new Date().toISOString(),
-        steps: result.steps
+        steps: result.steps,
+        graphData: result.graphData || null,
+        favorite: false,
+        notes: ''
     });
 
     // Keep only last 100 items
@@ -659,11 +668,35 @@ function saveToHistory(result) {
 }
 
 function loadHistory() {
-    const history = JSON.parse(localStorage.getItem('problemHistory') || '[]');
+    let history = JSON.parse(localStorage.getItem('problemHistory') || '[]');
     const container = document.getElementById('historyList');
+    const searchTerm = document.getElementById('historySearch')?.value?.toLowerCase() || '';
+
+    // Apply search filter
+    if (searchTerm) {
+        history = history.filter(item =>
+            (item.problem?.toLowerCase() || '').includes(searchTerm) ||
+            (item.solution?.toLowerCase() || '').includes(searchTerm)
+        );
+    }
+
+    // Apply type filter
+    if (currentFilter !== 'all') {
+        if (currentFilter === 'favorites') {
+            history = history.filter(item => item.favorite);
+        } else {
+            history = history.filter(item => item.type?.toLowerCase() === currentFilter);
+        }
+    }
+
+    // Apply sort
+    history = sortHistoryArray(history, currentSort);
 
     if (history.length === 0) {
-        container.innerHTML = '<p class="empty-state">No problems solved yet. Start solving to build your history!</p>';
+        const message = searchTerm || currentFilter !== 'all'
+            ? 'No problems match your filters.'
+            : 'No problems solved yet. Start solving to build your history!';
+        container.innerHTML = `<p class="empty-state">${message}</p>`;
         return;
     }
 
@@ -671,28 +704,104 @@ function loadHistory() {
     history.forEach(item => {
         const el = document.createElement('div');
         el.className = 'history-item';
-        el.onclick = () => viewHistoryItem(item);
         el.innerHTML = `
             <div class="history-item-header">
-                <span class="history-problem">${escapeHtml(item.problem?.substring(0, 30) || 'Unknown')}...</span>
-                <span class="history-date">${formatDate(item.date)}</span>
+                <div class="history-item-main" onclick="viewHistoryItem(${item.id})">
+                    <span class="history-problem">${escapeHtml(item.problem?.substring(0, 40) || 'Unknown')}${(item.problem?.length || 0) > 40 ? '...' : ''}</span>
+                    <div class="history-meta">
+                        <span class="history-date">${formatDate(item.date)}</span>
+                        ${item.type ? `<span class="history-type-badge">${item.type}</span>` : ''}
+                    </div>
+                </div>
+                <div class="history-actions">
+                    <button class="favorite-btn ${item.favorite ? 'active' : ''}" onclick="toggleFavorite(${item.id}, event)" title="Favorite">
+                        ${item.favorite ? '⭐' : '☆'}
+                    </button>
+                    <button class="add-note-btn" onclick="addNote(${item.id}, event)" title="Add note">
+                        📝
+                    </button>
+                </div>
             </div>
-            <div class="history-solution">= ${escapeHtml(item.solution || 'N/A')}</div>
+            <div class="history-solution" onclick="viewHistoryItem(${item.id})">= ${escapeHtml(item.solution || 'N/A')}</div>
+            ${item.notes ? `<div class="history-notes">${escapeHtml(item.notes)}</div>` : ''}
         `;
         container.appendChild(el);
     });
 }
 
-function viewHistoryItem(item) {
-    lastResult = item;
-    displayResults({
-        recognizedText: item.problem,
-        solution: item.solution,
-        problemType: item.type,
-        confidence: 1,
-        steps: item.steps || []
+function sortHistoryArray(history, sortType) {
+    switch (sortType) {
+        case 'oldest':
+            return [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
+        case 'alphabetical':
+            return [...history].sort((a, b) => (a.problem || '').localeCompare(b.problem || ''));
+        case 'newest':
+        default:
+            return [...history].sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+}
+
+function setFilter(filter) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === filter);
     });
-    switchTab('solve');
+    loadHistory();
+    triggerHaptic('light');
+}
+
+function sortHistory() {
+    currentSort = document.getElementById('historySort').value;
+    loadHistory();
+}
+
+function filterHistory() {
+    loadHistory();
+}
+
+function toggleFavorite(itemId, event) {
+    event.stopPropagation();
+    const history = JSON.parse(localStorage.getItem('problemHistory') || '[]');
+    const item = history.find(h => h.id === itemId);
+    if (item) {
+        item.favorite = !item.favorite;
+        localStorage.setItem('problemHistory', JSON.stringify(history));
+        loadHistory();
+        showToast(item.favorite ? 'Added to favorites' : 'Removed from favorites', 'success');
+        triggerHaptic();
+    }
+}
+
+function addNote(itemId, event) {
+    event.stopPropagation();
+    const history = JSON.parse(localStorage.getItem('problemHistory') || '[]');
+    const item = history.find(h => h.id === itemId);
+    if (item) {
+        const note = prompt('Add a note for this problem:', item.notes || '');
+        if (note !== null) {
+            item.notes = note;
+            localStorage.setItem('problemHistory', JSON.stringify(history));
+            loadHistory();
+            showToast('Note saved', 'success');
+        }
+    }
+}
+
+function viewHistoryItem(itemId) {
+    const history = JSON.parse(localStorage.getItem('problemHistory') || '[]');
+    const item = history.find(h => h.id === itemId);
+    if (item) {
+        lastResult = item;
+        displayResults({
+            recognizedText: item.problem,
+            solution: item.solution,
+            problemType: item.type,
+            confidence: 1,
+            steps: item.steps || [],
+            graphData: item.graphData
+        });
+        switchTab('solve');
+    }
 }
 
 function clearHistory() {
@@ -714,6 +823,257 @@ function formatDate(dateStr) {
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
     if (diff < 604800000) return `${Math.floor(diff / 86400000)}d ago`;
     return date.toLocaleDateString();
+}
+
+// ==================== TYPE INPUT ====================
+function insertSymbol(symbol) {
+    const textarea = document.getElementById('typedProblem');
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    textarea.value = text.substring(0, start) + symbol + text.substring(end);
+    textarea.selectionStart = textarea.selectionEnd = start + symbol.length;
+    textarea.focus();
+    triggerHaptic('light');
+}
+
+async function solveTypedProblem() {
+    const problem = document.getElementById('typedProblem').value.trim();
+    if (!problem) {
+        showToast('Please enter a math problem', 'error');
+        return;
+    }
+
+    const apiKey = localStorage.getItem('geminiApiKey');
+    if (!apiKey) {
+        showToast('API key not found. Please add your API key in settings.', 'error');
+        return;
+    }
+
+    if (!canMakeRequest()) {
+        showToast('Daily quota exceeded. Please try again tomorrow or upgrade.', 'error');
+        return;
+    }
+
+    // Switch to solve tab and show loading
+    switchTab('solve');
+    document.getElementById('uploadSection').style.display = 'none';
+    document.getElementById('loadingSection').style.display = 'block';
+    document.getElementById('resultsSection').style.display = 'none';
+    document.getElementById('errorSection').style.display = 'none';
+    triggerHaptic();
+
+    try {
+        const result = await callGeminiTextAPI(apiKey, problem);
+        lastResult = result;
+        recordUsage();
+        displayResults(result);
+        saveToHistory(result);
+        updateStats(result.problemType, false);
+        checkAchievements();
+
+        if (getSetting('voiceGuidance')) {
+            speakSolution();
+        }
+    } catch (error) {
+        displayError(error.message);
+    }
+}
+
+async function callGeminiTextAPI(apiKey, problem) {
+    const language = getSetting('language') || 'english';
+    const includeAlternatives = getSetting('includeAlternatives') !== false;
+    const includeExamples = getSetting('includeExamples') !== false;
+    const languageName = language === 'greek' ? 'Greek' : 'English';
+
+    const prompt = `You are an expert math tutor. Solve the following math problem. Respond in ${languageName}.
+
+Problem: ${problem}
+
+Return a JSON object with this exact structure:
+{
+    "recognizedText": "${problem}",
+    "problemType": "algebra|geometry|calculus|arithmetic|trigonometry|statistics|unknown",
+    "solution": "the final answer",
+    "confidence": 1.0,
+    "steps": [
+        {
+            "stepNumber": 1,
+            "title": "Step title",
+            "explanation": "What we're doing and why",
+            "mathExpression": "The mathematical work",
+            "hint": "A helpful tip (optional)"
+        }
+    ]${includeAlternatives ? `,
+    "alternativeMethods": [
+        {
+            "name": "Method name",
+            "description": "When to use this method",
+            "difficulty": "beginner|intermediate|advanced"
+        }
+    ]` : ''}${includeExamples ? `,
+    "realWorldExamples": [
+        {
+            "title": "Example title",
+            "scenario": "Real-world situation",
+            "application": "How this math applies"
+        }
+    ]` : ''},
+    "graphData": {
+        "type": "line|none",
+        "points": [{"x": 0, "y": 0}],
+        "expression": "y = x",
+        "xMin": -10,
+        "xMax": 10
+    }
+}
+
+If the problem involves a function that can be graphed (like y = 2x + 1, or f(x) = x²), include graphData. Otherwise set graphData.type to "none".
+
+IMPORTANT: Return ONLY valid JSON, no markdown code blocks.`;
+
+    const requestBody = {
+        contents: [{
+            parts: [{ text: prompt }]
+        }],
+        generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 4096
+        }
+    };
+
+    const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+        }
+    );
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || 'Failed to solve the problem. Please try again.');
+    }
+
+    const data = await response.json();
+    if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
+        throw new Error('No response from AI. Please try again.');
+    }
+
+    const responseText = data.candidates[0].content.parts[0].text;
+    let cleanedText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
+    try {
+        return JSON.parse(cleanedText);
+    } catch (e) {
+        console.error('Failed to parse response:', cleanedText);
+        throw new Error('Failed to parse the solution. Please try again.');
+    }
+}
+
+// ==================== GRAPH VISUALIZATION ====================
+function displayGraph(graphData) {
+    const graphCard = document.getElementById('graphCard');
+    const canvas = document.getElementById('mathGraph');
+
+    if (!graphData || graphData.type === 'none' || !graphData.points || graphData.points.length === 0) {
+        graphCard.style.display = 'none';
+        return;
+    }
+
+    graphCard.style.display = 'block';
+
+    // Destroy existing chart if any
+    if (mathChart) {
+        mathChart.destroy();
+    }
+
+    const ctx = canvas.getContext('2d');
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+
+    // Generate points if we have an expression
+    let points = graphData.points;
+    if (graphData.expression && graphData.xMin !== undefined && graphData.xMax !== undefined) {
+        points = generateGraphPoints(graphData.expression, graphData.xMin, graphData.xMax);
+    }
+
+    mathChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: graphData.expression || 'Function',
+                data: points.map(p => ({ x: p.x, y: p.y })),
+                borderColor: '#FF9500',
+                backgroundColor: 'rgba(255, 149, 0, 0.1)',
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'center',
+                    grid: {
+                        color: isDark ? '#3A3A3C' : '#E5E5EA'
+                    },
+                    ticks: {
+                        color: isDark ? '#8E8E93' : '#1C1C1E'
+                    }
+                },
+                y: {
+                    type: 'linear',
+                    position: 'center',
+                    grid: {
+                        color: isDark ? '#3A3A3C' : '#E5E5EA'
+                    },
+                    ticks: {
+                        color: isDark ? '#8E8E93' : '#1C1C1E'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: isDark ? '#FFFFFF' : '#1C1C1E'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function generateGraphPoints(expression, xMin, xMax) {
+    const points = [];
+    const step = (xMax - xMin) / 100;
+
+    // Simple expression parser for common functions
+    const expr = expression.toLowerCase()
+        .replace(/\^/g, '**')
+        .replace(/y\s*=\s*/g, '')
+        .replace(/f\(x\)\s*=\s*/g, '');
+
+    for (let x = xMin; x <= xMax; x += step) {
+        try {
+            // Replace x with the current value
+            const evalExpr = expr.replace(/x/g, `(${x})`);
+            // Safe evaluation using Function constructor
+            const y = Function(`'use strict'; return (${evalExpr})`)();
+            if (isFinite(y)) {
+                points.push({ x, y });
+            }
+        } catch (e) {
+            // Skip invalid points
+        }
+    }
+
+    return points;
 }
 
 // ==================== STATS & ACHIEVEMENTS ====================

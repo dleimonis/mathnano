@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#FEEF78">
+    <!-- Chart.js for graph visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="app-container" id="appContainer">
@@ -119,11 +121,15 @@
             <div class="nav-tabs">
                 <button class="nav-tab active" data-tab="solve" onclick="switchTab('solve')">
                     <span class="nav-icon">📸</span>
-                    <span class="nav-label">Solve</span>
+                    <span class="nav-label">Scan</span>
                 </button>
                 <button class="nav-tab" data-tab="draw" onclick="switchTab('draw')">
                     <span class="nav-icon">✏️</span>
                     <span class="nav-label">Draw</span>
+                </button>
+                <button class="nav-tab" data-tab="type" onclick="switchTab('type')">
+                    <span class="nav-icon">⌨️</span>
+                    <span class="nav-label">Type</span>
                 </button>
                 <button class="nav-tab" data-tab="history" onclick="switchTab('history')">
                     <span class="nav-icon">📚</span>
@@ -235,6 +241,17 @@
                         <div class="examples-container" id="examplesContainer"></div>
                     </div>
 
+                    <!-- Graph Visualization -->
+                    <div class="card result-card" id="graphCard" style="display: none;">
+                        <div class="result-header">
+                            <span class="result-icon">📈</span>
+                            <h3>Graph</h3>
+                        </div>
+                        <div class="graph-container">
+                            <canvas id="mathGraph"></canvas>
+                        </div>
+                    </div>
+
                     <!-- Actions -->
                     <div class="result-actions">
                         <button onclick="newProblem()" class="primary-btn">Solve Another Problem</button>
@@ -277,12 +294,66 @@
                 </div>
             </div>
 
+            <!-- Tab Content: Type -->
+            <div class="tab-content" id="typeTab">
+                <div class="card type-card">
+                    <h2>⌨️ Type Your Problem</h2>
+                    <p>Enter a math problem using text or symbols</p>
+
+                    <div class="type-input-container">
+                        <textarea id="typedProblem" placeholder="e.g., 2x + 5 = 15&#10;or: Find the derivative of x^2 + 3x&#10;or: What is the area of a circle with radius 5?" rows="4"></textarea>
+                        <div class="math-symbols">
+                            <button onclick="insertSymbol('²')" title="Squared">x²</button>
+                            <button onclick="insertSymbol('³')" title="Cubed">x³</button>
+                            <button onclick="insertSymbol('√')" title="Square root">√</button>
+                            <button onclick="insertSymbol('π')" title="Pi">π</button>
+                            <button onclick="insertSymbol('÷')" title="Divide">÷</button>
+                            <button onclick="insertSymbol('×')" title="Multiply">×</button>
+                            <button onclick="insertSymbol('±')" title="Plus/Minus">±</button>
+                            <button onclick="insertSymbol('∫')" title="Integral">∫</button>
+                            <button onclick="insertSymbol('Σ')" title="Sum">Σ</button>
+                            <button onclick="insertSymbol('θ')" title="Theta">θ</button>
+                        </div>
+                    </div>
+
+                    <button onclick="solveTypedProblem()" class="solve-btn" id="solveTypedBtn">
+                        <span class="solve-icon">✨</span>
+                        <span>Solve Problem</span>
+                    </button>
+                </div>
+            </div>
+
             <!-- Tab Content: History -->
             <div class="tab-content" id="historyTab">
                 <div class="history-header">
                     <h2>📚 Problem History</h2>
                     <button class="danger-btn small" onclick="clearHistory()">Clear All</button>
                 </div>
+
+                <!-- Search Bar -->
+                <div class="history-search">
+                    <input type="text" id="historySearch" placeholder="🔍 Search problems..." oninput="filterHistory()">
+                </div>
+
+                <!-- Filter & Sort Controls -->
+                <div class="history-controls">
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">All</button>
+                        <button class="filter-btn" data-filter="algebra" onclick="setFilter('algebra')">Algebra</button>
+                        <button class="filter-btn" data-filter="calculus" onclick="setFilter('calculus')">Calculus</button>
+                        <button class="filter-btn" data-filter="geometry" onclick="setFilter('geometry')">Geometry</button>
+                        <button class="filter-btn" data-filter="arithmetic" onclick="setFilter('arithmetic')">Arithmetic</button>
+                        <button class="filter-btn" data-filter="favorites" onclick="setFilter('favorites')">⭐ Favorites</button>
+                    </div>
+                    <div class="sort-dropdown">
+                        <select id="historySort" onchange="sortHistory()">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="alphabetical">A-Z</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="history-list" id="historyList">
                     <p class="empty-state">No problems solved yet. Start solving to build your history!</p>
                 </div>
