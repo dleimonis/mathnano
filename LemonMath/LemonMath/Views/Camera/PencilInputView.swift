@@ -165,7 +165,7 @@ struct PencilInputView: View {
                 }
 
                 PenButton(icon: "eraser", isSelected: false) {
-                    selectTool(.eraser)
+                    canvasView.tool = PKEraserTool(.bitmap)
                 }
             }
 
@@ -231,9 +231,6 @@ struct PencilCanvasViewRepresentable: UIViewRepresentable {
         canvasView.drawingPolicy = .anyInput // Allow finger or pencil
         canvasView.backgroundColor = .white
         canvasView.isOpaque = true
-
-        // Configure for Apple Pencil
-        canvasView.allowsFingerDrawing = true
 
         // Set default tool
         let pen = PKInkingTool(.pen, color: .black, width: 3)
@@ -411,29 +408,6 @@ enum DrawingTemplate: String, CaseIterable, Identifiable {
         case .coordinatePlane: return "chart.xyaxis.line"
         case .numberLine: return "line.horizontal.3"
         }
-    }
-}
-
-// MARK: - Pencil Gestures Support
-struct PencilGestureModifier: ViewModifier {
-    @State private var isDoubleTapEnabled = true
-
-    func body(content: Content) -> some View {
-        content
-            .onReceive(NotificationCenter.default.publisher(for: UIPencilInteraction.didTapNotification)) { _ in
-                handlePencilTap()
-            }
-    }
-
-    private func handlePencilTap() {
-        // Handle Apple Pencil double-tap gesture
-        // Common actions: switch tools, undo, etc.
-    }
-}
-
-extension View {
-    func pencilGestureSupport() -> some View {
-        modifier(PencilGestureModifier())
     }
 }
 
