@@ -57,7 +57,15 @@ jobs:
           -destination 'platform=iOS Simulator,name=iPhone 15' \
           -sdk iphonesimulator \
           CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO
+          CODE_SIGNING_REQUIRED=NO \
+          2>&1 | tee build.log
+
+        # Show any errors from the log
+        if [ ${PIPESTATUS[0]} -ne 0 ]; then
+          echo "❌ Build failed. Showing errors:"
+          grep -A 5 "error:" build.log || true
+          exit 1
+        fi
         echo "✅ Swift package builds successfully for iOS"
         
     - name: Run tests (if available)
