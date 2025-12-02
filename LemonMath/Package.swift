@@ -18,6 +18,12 @@ let package = Package(
         .target(
             name: "LemonMath",
             dependencies: [],
-            path: "LemonMath")
+            path: "LemonMath",
+            exclude: ["Info.plist"],
+            resources: [
+                .process("Assets.xcassets"),
+                .process("Resources/Localizable")
+            ]
+        )
     ]
 )
