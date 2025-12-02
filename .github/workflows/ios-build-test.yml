@@ -48,12 +48,17 @@ jobs:
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO
           
-    - name: Build Swift Package
+    - name: Build Swift Package for iOS
       if: steps.check_project.outputs.package_exists == 'true'
       run: |
         cd LemonMath
-        swift build
-        echo "✅ Swift package builds successfully"
+        xcodebuild build \
+          -scheme LemonMath \
+          -destination 'platform=iOS Simulator,name=iPhone 15' \
+          -sdk iphonesimulator \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO
+        echo "✅ Swift package builds successfully for iOS"
         
     - name: Run tests (if available)
       if: steps.check_project.outputs.project_exists == 'true'
