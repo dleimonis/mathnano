@@ -7,7 +7,7 @@ import Foundation
 import AVFoundation
 
 // MARK: - Voice Guidance Manager
-class VoiceGuidanceManager: ObservableObject {
+class VoiceGuidanceManager: NSObject, ObservableObject {
     static let shared = VoiceGuidanceManager()
 
     private let synthesizer = AVSpeechSynthesizer()
@@ -15,7 +15,8 @@ class VoiceGuidanceManager: ObservableObject {
 
     private var currentLanguage: SupportedLanguage = .english
 
-    private init() {
+    private override init() {
+        super.init()
         setupAudioSession()
     }
 

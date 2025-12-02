@@ -99,6 +99,14 @@ struct MathProblem: Identifiable, Codable, Equatable {
         guard let data = solvedImageData else { return nil }
         return UIImage(data: data)
     }
+
+    // Manual Equatable implementation since AlternativeSolution doesn't conform to Equatable
+    static func == (lhs: MathProblem, rhs: MathProblem) -> Bool {
+        lhs.id == rhs.id &&
+        lhs.problemText == rhs.problemText &&
+        lhs.solution == rhs.solution &&
+        lhs.createdAt == rhs.createdAt
+    }
 }
 
 // MARK: - Problem Type

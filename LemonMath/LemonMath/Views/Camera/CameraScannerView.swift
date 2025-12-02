@@ -548,8 +548,8 @@ struct PhotoLibraryPicker: UIViewControllerRepresentable {
 }
 
 // MARK: - UIImage Identifiable Extension
-extension UIImage: @retroactive Identifiable {
-    public var id: UUID { UUID() }
+extension UIImage: Identifiable {
+    public var id: ObjectIdentifier { ObjectIdentifier(self) }
 }
 
 #Preview {
