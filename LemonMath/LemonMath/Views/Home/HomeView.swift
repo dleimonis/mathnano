@@ -263,9 +263,29 @@ struct HomeView: View {
     // MARK: - Methods
 
     private func handleSelectedImage(_ image: UIImage) {
-        // Process the selected image
         showPhotoLibrary = false
-        // Navigate to processing view
+        appState.isProcessing = true
+
+        Task {
+            do {
+                let coordinator = MathSolvingCoordinator.shared
+                let problem = try await coordinator.solveMathProblem(
+                    image: image,
+                    language: settingsManager.selectedLanguage
+                )
+
+                await MainActor.run {
+                    appState.currentProblem = problem
+                    appState.isProcessing = false
+                    historyManager.addProblem(problem)
+                }
+            } catch {
+                await MainActor.run {
+                    appState.isProcessing = false
+                    print("Error solving problem: \(error.localizedDescription)")
+                }
+            }
+        }
     }
 }
 

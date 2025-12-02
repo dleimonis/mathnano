@@ -24,6 +24,13 @@ struct MathProblem: Identifiable, Codable, Equatable {
     var userNotes: String?
     var sharedCount: Int
 
+    // Verification fields
+    let verificationStatus: VerificationStatus?
+    let verifiedBy: [SolutionSource]?
+    let alternativeSolutions: [AlternativeSolution]?
+    let discrepancyNote: String?
+    let confidence: Double
+
     init(
         id: UUID = UUID(),
         originalImageData: Data? = nil,
@@ -39,7 +46,12 @@ struct MathProblem: Identifiable, Codable, Equatable {
         language: SupportedLanguage = .english,
         isFavorite: Bool = false,
         userNotes: String? = nil,
-        sharedCount: Int = 0
+        sharedCount: Int = 0,
+        verificationStatus: VerificationStatus? = nil,
+        verifiedBy: [SolutionSource]? = nil,
+        alternativeSolutions: [AlternativeSolution]? = nil,
+        discrepancyNote: String? = nil,
+        confidence: Double = 1.0
     ) {
         self.id = id
         self.originalImageData = originalImageData
@@ -56,6 +68,19 @@ struct MathProblem: Identifiable, Codable, Equatable {
         self.isFavorite = isFavorite
         self.userNotes = userNotes
         self.sharedCount = sharedCount
+        self.verificationStatus = verificationStatus
+        self.verifiedBy = verifiedBy
+        self.alternativeSolutions = alternativeSolutions
+        self.discrepancyNote = discrepancyNote
+        self.confidence = confidence
+    }
+
+    var isVerified: Bool {
+        return verificationStatus == .verified
+    }
+
+    var hasDiscrepancies: Bool {
+        return verificationStatus == .disputed || verificationStatus == .needsReview
     }
 
     var formattedDate: String {
@@ -86,6 +111,7 @@ enum ProblemType: String, Codable, CaseIterable {
     case linearAlgebra
     case numberTheory
     case arithmetic
+    case differentialEquations
     case unknown
 
     var displayName: String {
@@ -98,6 +124,7 @@ enum ProblemType: String, Codable, CaseIterable {
         case .linearAlgebra: return String(localized: "Linear Algebra")
         case .numberTheory: return String(localized: "Number Theory")
         case .arithmetic: return String(localized: "Arithmetic")
+        case .differentialEquations: return String(localized: "Differential Equations")
         case .unknown: return String(localized: "Math")
         }
     }
@@ -112,6 +139,7 @@ enum ProblemType: String, Codable, CaseIterable {
         case .linearAlgebra: return "square.grid.3x3"
         case .numberTheory: return "number"
         case .arithmetic: return "plus.forwardslash.minus"
+        case .differentialEquations: return "waveform.path.ecg"
         case .unknown: return "questionmark.circle"
         }
     }
@@ -126,6 +154,7 @@ enum ProblemType: String, Codable, CaseIterable {
         case .linearAlgebra: return LemonMathColors.linearAlgebraColor
         case .numberTheory: return LemonMathColors.numberTheoryColor
         case .arithmetic: return LemonMathColors.arithmeticColor
+        case .differentialEquations: return LemonMathColors.calculusColor
         case .unknown: return LemonMathColors.accent
         }
     }

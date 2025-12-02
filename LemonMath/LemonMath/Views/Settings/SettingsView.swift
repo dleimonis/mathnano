@@ -22,7 +22,10 @@ struct SettingsView: View {
 
     @StateObject private var usageManager = APIUsageManager.shared
     @AppStorage("geminiAPIKey") private var storedAPIKey = ""
+    @AppStorage("claudeAPIKey") private var storedClaudeAPIKey = ""
+    @AppStorage("verificationEnabled") private var verificationEnabled = false
     @AppStorage("adminAPIKey") private var storedAdminKey = ""
+    @State private var showClaudeAPIKeySheet = false
 
     var body: some View {
         NavigationStack {
@@ -72,6 +75,9 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showAPIKeySheet) {
                 APIKeyConfigView(apiKey: $storedAPIKey)
+            }
+            .sheet(isPresented: $showClaudeAPIKeySheet) {
+                ClaudeAPIKeyConfigView(apiKey: $storedClaudeAPIKey)
             }
             .sheet(isPresented: $showPrivacyPolicy) {
                 PrivacyPolicyView()
@@ -233,6 +239,7 @@ struct SettingsView: View {
     // MARK: - API Configuration Section
     private var apiConfigSection: some View {
         SettingsSection(title: "API Configuration", icon: "key.fill") {
+            // Gemini API Key
             Button {
                 showAPIKeySheet = true
             } label: {
@@ -265,6 +272,54 @@ struct SettingsView: View {
                         .foregroundStyle(.blue)
 
                     Text("Get your free API key from Google AI Studio")
+                        .font(.caption)
+                        .foregroundStyle(Color.adaptiveSecondaryText)
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 12)
+            }
+
+            // Claude API Key (for verification)
+            Button {
+                showClaudeAPIKeySheet = true
+            } label: {
+                HStack {
+                    Image(systemName: storedClaudeAPIKey.isEmpty ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
+                        .foregroundStyle(storedClaudeAPIKey.isEmpty ? .gray : .green)
+                        .frame(width: 24)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Claude API Key")
+                            .foregroundStyle(Color.adaptivePrimaryText)
+
+                        Text(storedClaudeAPIKey.isEmpty ? "Optional - for verification" : "Key configured")
+                            .font(.caption)
+                            .foregroundStyle(Color.adaptiveSecondaryText)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(Color.adaptiveSecondaryText)
+                }
+                .padding()
+            }
+
+            // Solution Verification Toggle
+            SettingsRow(icon: "checkmark.shield.fill", title: "Solution Verification") {
+                Toggle("", isOn: $verificationEnabled)
+                    .labelsHidden()
+                    .tint(LemonMathColors.accent)
+                    .disabled(storedClaudeAPIKey.isEmpty)
+            }
+
+            if !storedClaudeAPIKey.isEmpty && verificationEnabled {
+                HStack(spacing: 8) {
+                    Image(systemName: "info.circle")
+                        .foregroundStyle(.blue)
+
+                    Text("Solutions will be verified by Claude for accuracy")
                         .font(.caption)
                         .foregroundStyle(Color.adaptiveSecondaryText)
                 }
@@ -663,6 +718,164 @@ struct InstructionRow: View {
             Text(text)
                 .font(.subheadline)
                 .foregroundStyle(Color.adaptivePrimaryText)
+        }
+    }
+}
+
+// MARK: - Claude API Key Configuration View
+struct ClaudeAPIKeyConfigView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var apiKey: String
+    @State private var inputKey = ""
+    @State private var showKey = false
+    @FocusState private var isInputFocused: Bool
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Header
+                    VStack(spacing: 12) {
+                        Image(systemName: "checkmark.shield.fill")
+                            .font(.system(size: 50))
+                            .foregroundStyle(.purple)
+
+                        Text("Claude API Key")
+                            .font(.title2)
+                            .fontWeight(.bold)
+
+                        Text("Add your Anthropic Claude API key to enable solution verification. Claude will double-check math solutions for accuracy.")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.adaptiveSecondaryText)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.top, 20)
+
+                    // API Key Input
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("API Key")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+
+                        HStack {
+                            if showKey {
+                                TextField("Enter your Claude API key", text: $inputKey)
+                                    .textContentType(.password)
+                                    .autocapitalization(.none)
+                                    .autocorrectionDisabled()
+                                    .focused($isInputFocused)
+                            } else {
+                                SecureField("Enter your Claude API key", text: $inputKey)
+                                    .textContentType(.password)
+                                    .focused($isInputFocused)
+                            }
+
+                            Button {
+                                showKey.toggle()
+                            } label: {
+                                Image(systemName: showKey ? "eye.slash" : "eye")
+                                    .foregroundStyle(Color.adaptiveSecondaryText)
+                            }
+                        }
+                        .padding()
+                        .background(Color.adaptiveCardBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(isInputFocused ? .purple : Color.clear, lineWidth: 2)
+                        )
+                    }
+
+                    // Instructions
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("How to get your API key:")
+                            .font(.headline)
+
+                        InstructionRow(number: 1, text: "Go to console.anthropic.com")
+                        InstructionRow(number: 2, text: "Sign in or create an account")
+                        InstructionRow(number: 3, text: "Navigate to API Keys section")
+                        InstructionRow(number: 4, text: "Create a new API key")
+                        InstructionRow(number: 5, text: "Paste the key above")
+
+                        Link(destination: URL(string: "https://console.anthropic.com/settings/keys")!) {
+                            HStack {
+                                Image(systemName: "safari")
+                                Text("Open Anthropic Console")
+                            }
+                            .font(.subheadline)
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.purple)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                    }
+                    .padding()
+                    .background(Color.adaptiveCardBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+
+                    // Info box
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Image(systemName: "info.circle")
+                                .foregroundStyle(.blue)
+                            Text("Why use verification?")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                        }
+
+                        Text("Claude will verify solutions from Gemini, catching calculation errors and providing higher accuracy for complex problems.")
+                            .font(.caption)
+                            .foregroundStyle(Color.adaptiveSecondaryText)
+                    }
+                    .padding()
+                    .background(Color.blue.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                    // Remove key button
+                    if !apiKey.isEmpty {
+                        Button {
+                            inputKey = ""
+                            apiKey = ""
+                            dismiss()
+                        } label: {
+                            HStack {
+                                Image(systemName: "trash")
+                                Text("Remove API Key")
+                            }
+                            .font(.subheadline)
+                            .foregroundStyle(.red)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.red.opacity(0.1))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                    }
+
+                    Spacer(minLength: 40)
+                }
+                .padding()
+            }
+            .navigationTitle("Claude Setup")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Save") {
+                        apiKey = inputKey.trimmingCharacters(in: .whitespacesAndNewlines)
+                        dismiss()
+                    }
+                    .fontWeight(.semibold)
+                }
+            }
+        }
+        .onAppear {
+            inputKey = apiKey
         }
     }
 }

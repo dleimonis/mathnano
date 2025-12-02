@@ -17,26 +17,28 @@ Lemon Math is an AI-powered math problem solver that recognizes handwritten math
 # Open in Xcode
 open LemonMath/LemonMath.xcodeproj
 
-# Or build via command line
-cd LemonMath
+# Build via command line
 xcodebuild -scheme LemonMath -destination 'platform=iOS Simulator,name=iPhone 15'
 
 # Run tests
 xcodebuild test -scheme LemonMath -destination 'platform=iOS Simulator,name=iPhone 15'
+
+# Build using Swift Package Manager
+cd LemonMath && swift build
 ```
 
 ### Web App (cross-platform)
 ```bash
 # Using Python (simplest)
-cd web
-python3 -m http.server 8000
+cd web && python3 -m http.server 8000
 # Then open http://localhost:8000
 
 # Using Node.js
 npx serve web
 
-# Using PHP
-cd web && php -S localhost:8000
+# Run web tests (validates file structure and JavaScript syntax)
+./scripts/test-web.sh      # macOS/Linux
+scripts\test-web.bat       # Windows
 ```
 
 ## Architecture
@@ -51,27 +53,34 @@ cd web && php -S localhost:8000
 
 ### Key Services
 
-- **GeminiService** (`Services/GeminiService.swift`) - Google Gemini Vision API integration with retry logic
-- **ImagePreprocessor** (`Utilities/ImagePreprocessor.swift`) - CoreImage pipeline for handwriting normalization (handles slant, spacing, line thickness variations)
-- **APIUsageManager** (`Services/APIUsageManager.swift`) - Rate limiting and quota management with three tiers (Free: 50/day, Premium: 1000/day, Unlimited)
+- **GeminiService** (`LemonMath/LemonMath/Services/GeminiService.swift`) - Google Gemini Vision API integration with retry logic
+- **ImagePreprocessor** (`LemonMath/LemonMath/Utilities/ImagePreprocessor.swift`) - CoreImage pipeline for handwriting normalization
+- **APIUsageManager** (`LemonMath/LemonMath/Services/APIUsageManager.swift`) - Rate limiting (10 req/min, 100 req/hour, 500 req/day) and quota tiers (Free: 50/day, Premium: 1000/day, Unlimited)
 
 ### API Configuration
 
-- **Model**: `gemini-1.5-flash`
+- **Model**: `gemini-2.0-flash`
 - **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/`
 - **API key storage**: iOS uses `@AppStorage("geminiAPIKey")`, Web uses `localStorage`
 - **Get API key**: https://aistudio.google.com/apikey
 
 ### Admin Dashboard Access
-The Admin Dashboard for managing API quotas is hidden from regular users. Access it by:
-1. Long-press the Version number in Settings for 3 seconds, OR
-2. If previously authenticated, the button appears in the API Usage section
+Hidden from regular users. Access by long-pressing the Version number in Settings for 3 seconds.
 
 ### Localization
-English (en) and Greek (el) - files in `Resources/Localizable/`
+English (en) and Greek (el) - files in `LemonMath/LemonMath/Resources/Localizable/`
 
-### Development Notes
-- iOS app requires macOS with Xcode 15+ and iOS 17.0+ target
-- Web version can be developed/tested on any OS
-- Swift 5.9+ with iOS 17 Observation framework (`@Observable`)
+## CI/CD
+
+GitHub Actions workflow (`.github/workflows/ios-build-test.yml`) runs on:
+- Push to `main` or `claude/*` branches
+- Pull requests to `main`
+
+The workflow builds the iOS app on macOS 14 runner with Xcode 15.2.
+
+## Development Notes
+
+- iOS: macOS with Xcode 15+, iOS 17.0+ target, Swift 5.9+ with `@Observable`
+- Web: Any OS, no build step required
 - All API calls use `async/await`
+- App Store submission checklist: `AppStore/APP_STORE_CHECKLIST.md`

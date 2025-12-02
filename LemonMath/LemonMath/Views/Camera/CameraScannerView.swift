@@ -193,7 +193,31 @@ struct CameraScannerView: View {
 
     private func processImage(_ image: UIImage) {
         showProcessing = true
-        // Will navigate to processing/solution view
+        appState.isProcessing = true
+
+        Task {
+            do {
+                let coordinator = MathSolvingCoordinator.shared
+                let problem = try await coordinator.solveMathProblem(
+                    image: image,
+                    language: settingsManager.selectedLanguage
+                )
+
+                await MainActor.run {
+                    appState.currentProblem = problem
+                    appState.isProcessing = false
+                    showProcessing = false
+                    dismiss()
+                }
+            } catch {
+                await MainActor.run {
+                    appState.isProcessing = false
+                    showProcessing = false
+                    // Handle error - could show alert
+                    print("Error solving problem: \(error.localizedDescription)")
+                }
+            }
+        }
     }
 }
 
