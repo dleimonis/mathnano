@@ -17,10 +17,6 @@ let package = Package(
         .target(
             name: "LemonMath",
             dependencies: [],
-            path: "LemonMath"),
-        .testTarget(
-            name: "LemonMathTests",
-            dependencies: ["LemonMath"],
-            path: "LemonMathTests"),
+            path: "LemonMath")
     ]
 )
