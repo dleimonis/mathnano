@@ -384,6 +384,7 @@ async function solveProblem(fromDrawing = false) {
     document.getElementById('resultsSection').style.display = 'none';
     document.getElementById('errorSection').style.display = 'none';
     triggerHaptic();
+    mascotThinking(); // Start mascot thinking animation
 
     try {
         const result = await callGeminiAPI(apiKey, currentImageBase64);
@@ -520,6 +521,10 @@ function displayResults(result) {
     document.getElementById('loadingSection').style.display = 'none';
     document.getElementById('resultsSection').style.display = 'block';
 
+    // Mascot celebration!
+    mascotStopThinking();
+    mascotCelebrate();
+
     // Recognized Text
     document.getElementById('recognizedText').textContent = result.recognizedText || 'Could not recognize';
     document.getElementById('problemType').textContent = result.problemType || 'Unknown';
@@ -630,6 +635,8 @@ function displayError(message) {
     document.getElementById('errorSection').style.display = 'block';
     document.getElementById('errorMessage').textContent = message;
     triggerHaptic('error');
+    mascotStopThinking();
+    mascotSad(); // Mascot reacts to error
 }
 
 function newProblem() {
@@ -1585,6 +1592,166 @@ function mascotWave() {
     setTimeout(() => mascot.style.animation = '', 500);
     triggerHaptic();
 }
+
+// ==================== ENHANCED MASCOT ANIMATIONS ====================
+function mascotCelebrate() {
+    const mascot = document.querySelector('.mascot-mini');
+    if (!mascot) return;
+
+    mascot.classList.add('celebrating');
+    triggerHaptic('success');
+
+    // Create confetti
+    createConfetti();
+
+    // Create emoji burst
+    createEmojiBurst(['🎉', '✨', '🌟', '🎊'], mascot);
+
+    setTimeout(() => {
+        mascot.classList.remove('celebrating');
+        mascot.classList.add('success-glow');
+        setTimeout(() => mascot.classList.remove('success-glow'), 1000);
+    }, 600);
+}
+
+function mascotThinking() {
+    const mascot = document.querySelector('.mascot-mini');
+    if (!mascot) return;
+
+    mascot.classList.add('thinking');
+}
+
+function mascotStopThinking() {
+    const mascot = document.querySelector('.mascot-mini');
+    if (!mascot) return;
+
+    mascot.classList.remove('thinking');
+}
+
+function mascotDance() {
+    const mascot = document.querySelector('.mascot-mini');
+    if (!mascot) return;
+
+    mascot.classList.add('dancing');
+    triggerHaptic('light');
+
+    setTimeout(() => mascot.classList.remove('dancing'), 2400); // 3 dance cycles
+}
+
+function mascotSad() {
+    const mascot = document.querySelector('.mascot-mini');
+    if (!mascot) return;
+
+    mascot.classList.add('sad');
+    triggerHaptic('error');
+
+    setTimeout(() => mascot.classList.remove('sad'), 2000);
+}
+
+function mascotJump() {
+    const mascot = document.querySelector('.mascot-mini');
+    if (!mascot) return;
+
+    mascot.classList.add('jump');
+    triggerHaptic('medium');
+
+    setTimeout(() => mascot.classList.remove('jump'), 500);
+}
+
+function mascotHappyWiggle() {
+    const mascot = document.querySelector('.mascot-mini');
+    if (!mascot) return;
+
+    mascot.classList.add('happy-wiggle');
+    triggerHaptic('light');
+
+    setTimeout(() => mascot.classList.remove('happy-wiggle'), 400);
+}
+
+function createConfetti() {
+    const container = document.createElement('div');
+    container.className = 'confetti-container';
+    document.body.appendChild(container);
+
+    const colors = ['#FEEF78', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8'];
+
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = Math.random() * 0.5 + 's';
+        confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
+
+        // Random shapes
+        const shapes = ['circle', 'square', 'triangle'];
+        const shape = shapes[Math.floor(Math.random() * shapes.length)];
+        if (shape === 'circle') {
+            confetti.style.borderRadius = '50%';
+        } else if (shape === 'triangle') {
+            confetti.style.width = '0';
+            confetti.style.height = '0';
+            confetti.style.borderLeft = '5px solid transparent';
+            confetti.style.borderRight = '5px solid transparent';
+            confetti.style.borderBottom = '10px solid ' + colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.backgroundColor = 'transparent';
+        }
+
+        container.appendChild(confetti);
+    }
+
+    // Remove confetti container after animation
+    setTimeout(() => container.remove(), 4000);
+}
+
+function createEmojiBurst(emojis, targetElement) {
+    const rect = targetElement.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    emojis.forEach((emoji, index) => {
+        const burst = document.createElement('div');
+        burst.className = 'emoji-burst';
+        burst.textContent = emoji;
+        burst.style.left = (centerX - 15 + (index - 1.5) * 30) + 'px';
+        burst.style.top = centerY + 'px';
+        burst.style.animationDelay = (index * 0.1) + 's';
+
+        document.body.appendChild(burst);
+
+        setTimeout(() => burst.remove(), 1100 + index * 100);
+    });
+}
+
+// Random idle animations for the mascot
+let mascotIdleInterval = null;
+
+function startMascotIdleAnimations() {
+    if (mascotIdleInterval) return;
+
+    mascotIdleInterval = setInterval(() => {
+        const animations = ['jump', 'happy-wiggle'];
+        const randomAnim = animations[Math.floor(Math.random() * animations.length)];
+
+        if (randomAnim === 'jump') {
+            mascotJump();
+        } else {
+            mascotHappyWiggle();
+        }
+    }, 15000 + Math.random() * 10000); // Every 15-25 seconds
+}
+
+function stopMascotIdleAnimations() {
+    if (mascotIdleInterval) {
+        clearInterval(mascotIdleInterval);
+        mascotIdleInterval = null;
+    }
+}
+
+// Start idle animations when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    startMascotIdleAnimations();
+});
 
 // ==================== EVENT LISTENERS ====================
 document.getElementById('settingsModal')?.addEventListener('click', (e) => {
