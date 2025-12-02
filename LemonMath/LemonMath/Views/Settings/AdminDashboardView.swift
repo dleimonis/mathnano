@@ -581,7 +581,7 @@ struct QuotaEditorView: View {
         }
     }
 
-    private func saveQuota() {
+    @MainActor private func saveQuota() {
         let quota = UserQuota(
             tier: selectedTier,
             dailyLimit: Int(dailyLimit) ?? 20,
@@ -653,7 +653,7 @@ struct RateLimitEditorView: View {
         }
     }
 
-    private func saveLimits() {
+    @MainActor private func saveLimits() {
         _ = APIUsageManager.shared.setRateLimits(
             perMinute: Int(perMinute) ?? 10,
             perHour: Int(perHour) ?? 100,
