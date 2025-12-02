@@ -241,12 +241,19 @@ class APIUsageManager: ObservableObject {
     func exportUsageReport(adminKey: String) -> UsageReport? {
         guard validateAdminKey(adminKey) else { return nil }
 
+        let analytics = getAnalytics(for: .all)
+        let analyticsCodable = UsageAnalyticsCodable(
+            totalRequests: analytics.totalRequests,
+            successRate: analytics.successRate,
+            totalTokensUsed: analytics.totalTokensUsed
+        )
+
         return UsageReport(
             generatedAt: Date(),
             stats: currentUsage,
             quota: userQuota,
             history: usageHistory,
-            analytics: getAnalytics(for: .all)
+            analytics: analyticsCodable
         )
     }
 
